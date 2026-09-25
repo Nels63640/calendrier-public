@@ -6,9 +6,9 @@ Foyers, invitations, rôles, enfants et catégories, événements avec récurren
 
 Validation locale : npm run check réussi, 27 tests unitaires/PostgreSQL et 57 tests navigateur Chromium/WebKit. Auth HTTP simulé dans les tests ; moteur SQL réel via PGlite.
 
-L’utilisateur confirme « success » après INSTALL.sql. L’API réelle reconnaît households et refuse les lectures anonymes avec le code PostgreSQL 42501. Aucune inscription ni réception de courriel réelle vérifiée. Les paramètres Auth et les modèles de codes restent à appliquer, et aucun SMTP n’est disponible.
+L’utilisateur confirme « success » après INSTALL.sql. L’API réelle reconnaît households et refuse les lectures anonymes avec le code PostgreSQL 42501. Auth réel vérifié en lecture : e-mail activé, inscriptions ouvertes, confirmation obligatoire. Aucune inscription ni réception de courriel réelle vérifiée. Les paramètres Auth et les modèles de codes restent à appliquer, et aucun SMTP n’est disponible.
 
-GitHub Pages et variables publiques du dépôt configurés ; publication en cours. Moteur de rappels et SQL de planification préparés, mais fonction serveur, secrets VAPID et cron non déployés. Réception sur iPhone non vérifiée.
+GitHub Pages publié : https://nels63640.github.io/calendrier-public/ . Workflow 36189537272 réussi, commit applicatif 0dfdf6b. HTTP 200 pour page, manifest, Service Worker et icône ; formulaire public actif et rechargement du lien profond vérifiés dans Chromium. Variables publiques du dépôt configurées. Moteur de rappels et SQL de planification préparés, mais fonction serveur, secrets VAPID et cron non déployés. Réception sur iPhone non vérifiée.
 
 Les sections suivantes sont historiques et leurs restrictions de phase sont remplacées par l’autorisation actuelle.
 
