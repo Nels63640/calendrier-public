@@ -1,0 +1,62 @@
+.account-card {
+  max-width: 640px;
+}
+.account-card h2 {
+  margin-top: 0;
+}
+.account-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.account-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+.account-form input,
+.account-form select {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+}
+.account-form p {
+  margin: 0;
+}
+.account-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 16px;
+}
+.account-links a {
+  padding-block: 10px;
+}
+.account-notice {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.account-feedback {
+  min-height: 24px;
+  margin-block: 16px !important;
+  overflow-wrap: anywhere;
+}
+.account-email {
+  overflow-wrap: anywhere;
+}
+.account-form :disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}

@@ -1,0 +1,144 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: var(--background);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  color-scheme: light;
+  --background: #f7f5ef;
+  --surface: #fffefb;
+  --text: #293e34;
+  --muted: #657168;
+  --line: #e2e5db;
+  --primary: #315748;
+  --on-primary: #ffffff;
+  --soft: #edf1e8;
+  --hero: #e9eee2;
+  --peach: #f5e5da;
+  --sand: #f2ebd8;
+  --lavender: #ebe7f1;
+  --focus: #a24a29;
+  --shadow: 0 8px 28px #293e3405;
+  --art-halo: #dce4d1;
+  --art-paper: #fffdf5;
+  --art-sun: #e8be74;
+  --art-line: #55715e;
+  --art-peach: #e0a58b;
+  --art-leaf: #92aa80;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --background: #191e1b;
+  --surface: #222a25;
+  --text: #edf0e7;
+  --muted: #b0bbae;
+  --line: #3c493e;
+  --primary: #b7d5ba;
+  --on-primary: #203427;
+  --soft: #303e32;
+  --hero: #2d3b2f;
+  --peach: #493a31;
+  --sand: #443f2c;
+  --lavender: #3b3548;
+  --focus: #f1bf84;
+  --shadow: none;
+  --art-halo: #3d503d;
+  --art-paper: #b9c9ad;
+  --art-sun: #b9985d;
+  --art-line: #263f31;
+  --art-peach: #c7957c;
+  --art-leaf: #8da77a;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+  line-height: 1.55;
+}
+button,
+input {
+  font: inherit;
+}
+button,
+a,
+label {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+a {
+  touch-action: manipulation;
+}
+button {
+  cursor: pointer;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  color: inherit;
+}
+svg {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 5px;
+}
+h1:focus,
+main:focus {
+  outline: none;
+}
+::selection {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.muted {
+  color: var(--muted);
+}
+.eyebrow {
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 12px;
+  padding: 12px 18px;
+  background: var(--surface);
+  z-index: 100;
+  transform: translateY(-180%);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

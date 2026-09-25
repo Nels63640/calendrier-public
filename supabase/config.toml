@@ -1,0 +1,22 @@
+project_id = "family-calendar"
+
+[functions.reminders]
+verify_jwt = false
+import_map = "./functions/deno.json"
+
+[auth]
+site_url = "http://127.0.0.1:4173"
+minimum_password_length = 12
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+otp_expiry = 900
+
+[auth.email.template.confirmation]
+subject = "Votre code Calendrier familial"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Retrouver votre compte Calendrier familial"
+content_path = "./supabase/templates/recovery.html"

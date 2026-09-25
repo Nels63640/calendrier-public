@@ -1,0 +1,103 @@
+.pwa-status:empty {
+  display: none;
+}
+.pwa-status {
+  margin-bottom: 24px;
+}
+.status-notice,
+.update-notice {
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--sand);
+  font-size: 0.87rem;
+}
+.update-notice {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: space-between;
+}
+.update-notice p {
+  margin-top: 5px;
+}
+.installation-card,
+.notification-card {
+  margin-top: 22px;
+}
+.installation-card h2,
+.notification-card h2,
+.push-proof-card h2 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+.installation-card > p,
+.notification-card > p,
+.push-proof-card > p {
+  margin-block: 12px;
+  font-size: 0.87rem;
+}
+details {
+  margin-top: 18px;
+  font-size: 0.85rem;
+}
+summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding-block: 12px;
+  color: var(--primary);
+  font-weight: 600;
+}
+details li + li {
+  margin-top: 10px;
+}
+details p {
+  margin-top: 12px;
+}
+.pwa-caption {
+  font-size: 0.78rem !important;
+}
+.proof-form {
+  display: grid;
+  gap: 12px;
+  margin: 22px 0;
+}
+.proof-form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.proof-form input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--background);
+  color: var(--text);
+  font-size: 1rem;
+}
+.proof-form p {
+  font-size: 0.8rem;
+}
+.proof-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block: 22px;
+}
+.secondary {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+.proof-result {
+  padding: 14px;
+  background: var(--soft);
+  border-radius: 10px;
+}
