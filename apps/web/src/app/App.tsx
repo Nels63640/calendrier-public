@@ -8,7 +8,6 @@ import { CalendarPage } from '../features/calendar/CalendarPage'
 import { ListsPage } from '../features/family/ListsPage'
 import { HouseholdPage } from '../features/family/HouseholdPage'
 import { FamilyBar } from '../features/family/FamilyShell'
-import { LiveDashboard } from '../features/dashboard/LiveDashboard'
 import { useAccount } from '../features/auth/auth-context'
 import { NotFoundPage } from '../features/overview/NotFoundPage'
 import { ProfilePage } from '../features/settings/ProfilePage'
@@ -23,6 +22,7 @@ export function App() {
   const familyKey = (account.user?.id ?? '') + family.active
   const [quickOpen, setQuickOpen] = useState(false)
   const { pathname } = useLocation()
+  const calendarHome = pathname === '/calendrier' || (pathname === '/' && Boolean(account.user))
   const previousPath = useRef(pathname)
 
   const openQuickAdd = (event: MouseEvent<HTMLButtonElement>) => {
@@ -55,7 +55,9 @@ export function App() {
   )
 
   return (
-    <div className="app-shell">
+    <div
+      className={`app-shell${calendarHome ? ' calendar-shell' : account.user ? ' simple-shell' : ''}`}
+    >
       <a
         className="skip-link"
         href="#main-content"
@@ -95,6 +97,11 @@ export function App() {
       </aside>
       <div className="workspace">
         <header className="topbar">
+          {account.user && (
+            <Link className="return-calendar" to="/" aria-label="Retour au calendrier">
+              ‹ Calendrier
+            </Link>
+          )}
           <Link to="/" className="mobile-brand">
             <span className="brand-mark">
               <Icon name="home" size={20} />
@@ -106,7 +113,7 @@ export function App() {
         </header>
         <main id="main-content" className="main-content" tabIndex={-1}>
           <PwaStatus />
-          <FamilyBar />
+          {!calendarHome && <FamilyBar />}
           <Routes>
             {(['connexion', 'inscription', 'verification', 'recuperation'] as const).map((mode) => (
               <Route
@@ -115,7 +122,10 @@ export function App() {
                 element={<AuthPage key={mode} mode={mode} />}
               />
             ))}
-            <Route path="/" element={account.user ? <LiveDashboard /> : <HomePage />} />
+            <Route
+              path="/"
+              element={account.user ? <CalendarPage key={familyKey} /> : <HomePage />}
+            />
             <Route path="/calendrier" element={<CalendarPage key={familyKey} />} />
             <Route path="/taches" element={<ListsPage key={familyKey + 'tasks'} kind="task" />} />
             <Route

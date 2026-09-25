@@ -38,16 +38,16 @@ export function AuthPage({ mode }: { mode: Mode }) {
       if (mode === 'connexion') {
         await accountApi.signIn(email, password)
         form.reset()
-        navigate('/profil')
+        navigate('/')
       } else if (mode === 'inscription') {
         const connected = await accountApi.signUp(email, password, String(data.get('first_name')))
         form.reset()
-        if (connected) navigate('/profil')
+        if (connected) navigate('/')
         else navigate('/auth/verification')
       } else if (passwordStep) {
         await accountApi.changePassword(password)
         form.reset()
-        navigate('/profil')
+        navigate('/')
       } else if (codeStep) {
         await accountApi.verify(
           email,
@@ -55,7 +55,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
           mode === 'verification' ? 'email' : 'recovery',
         )
         form.reset()
-        if (mode === 'verification') navigate('/profil')
+        if (mode === 'verification') navigate('/')
         else setStep('password')
       } else {
         await accountApi.sendCode(email, 'recovery')

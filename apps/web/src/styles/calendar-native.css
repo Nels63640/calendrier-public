@@ -1,0 +1,796 @@
+﻿/* Vues inspirées des références iPhone : la barre système reste celle de l’appareil. */
+.calendar-shell,
+.native-sheet {
+  color-scheme: dark;
+  --background: #000;
+  --surface: #191919;
+  --text: #f5f5f7;
+  --muted: #98989f;
+  --line: #29292b;
+  --primary: #ff414b;
+  --on-primary: #fff;
+  --soft: #252527;
+  --focus: #ff7178;
+  color: var(--text);
+  background: #000;
+}
+html:has(.calendar-shell) {
+  background: #000;
+  color-scheme: dark;
+}
+.calendar-shell > .sidebar,
+.calendar-shell > .bottom-nav,
+.calendar-shell .topbar,
+.calendar-shell .page-footer {
+  display: none;
+}
+.calendar-shell .workspace {
+  margin: 0;
+  width: 100%;
+}
+.calendar-shell .main-content {
+  max-width: none;
+  padding: 0;
+  margin: 0;
+}
+.calendar-shell .pwa-status {
+  position: absolute;
+  z-index: 20;
+}
+.native-calendar {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-width: 1000px;
+  margin: auto;
+  position: relative;
+  padding-top: env(safe-area-inset-top);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.25;
+}
+.native-calendar button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+.native-calendar button:focus-visible,
+.native-sheet button:focus-visible {
+  outline: 2px solid #ff7178;
+  outline-offset: 3px;
+}
+.native-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 16px 15px;
+  flex: none;
+  min-height: 78px;
+  gap: 8px;
+}
+.native-calendar .glass {
+  border: 1px solid #ffffff18;
+  background: #202020cf;
+  box-shadow:
+    inset 0 0 0 0.5px #ffffff08,
+    0 3px 15px #0003;
+  border-radius: 40px;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+.native-calendar .back-control {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 44px;
+  padding: 0 14px 0 9px;
+  font-size: 18px;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+.top-actions,
+.bottom-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 6px;
+  padding: 0 7px;
+}
+.top-actions button,
+.bottom-actions button {
+  display: grid;
+  place-items: center;
+  min-width: 48px;
+  min-height: 44px;
+  position: relative;
+}
+.native-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 21px 10px;
+  flex: none;
+}
+.native-heading h1 {
+  font-family: inherit;
+  font-size: 34px;
+  letter-spacing: -1.3px;
+  line-height: 1.2;
+  font-weight: 750;
+  text-transform: capitalize;
+}
+.native-heading.year-heading {
+  margin: 6px 23px 0;
+  padding: 8px 0 4px;
+  border-bottom: 1px solid #29292b;
+}
+.native-heading.year-heading h1 {
+  font-size: 35px;
+  color: #ff414b;
+  letter-spacing: -1px;
+}
+.period-controls {
+  display: flex;
+  gap: 3px;
+}
+.period-controls button {
+  min-width: 32px;
+  min-height: 36px;
+  color: #88888c;
+}
+.period-controls svg {
+  width: 16px;
+  height: 16px;
+}
+.native-scroll {
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 100px;
+  animation: calendar-fade 0.2s ease-out;
+}
+.native-scroll::-webkit-scrollbar {
+  display: none;
+}
+.native-year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 12px;
+  row-gap: 23px;
+  padding: 14px 24px 0;
+}
+.native-calendar .mini-month {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 127px;
+  align-self: start;
+}
+.mini-month h2 {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: -0.5px;
+  text-transform: capitalize;
+  margin-bottom: 9px;
+}
+.mini-month h2.red {
+  color: #ff414b;
+}
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  width: 100%;
+  row-gap: 2px;
+  font-size: 10px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+.mini-grid span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+}
+.native-calendar .today {
+  background: #ff414b;
+  color: white;
+  border-radius: 50%;
+}
+.native-calendar .next-year {
+  display: block;
+  color: #666;
+  font-size: 34px;
+  font-weight: 700;
+  text-align: left;
+  margin: 35px 24px 15px;
+}
+.native-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  padding: 3px 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  flex: none;
+}
+.weekend {
+  color: #78787e;
+}
+.native-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.native-day {
+  border-top: 1px solid #29292b;
+  min-height: max(110px, calc((100dvh - 195px) / 5));
+  text-align: center;
+  min-width: 0;
+  padding-top: 8px;
+}
+.native-calendar .native-date {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1;
+}
+.native-day.blank {
+  border-top-color: #29292b;
+}
+.native-calendar .next-month-title {
+  display: block;
+  text-transform: capitalize;
+  text-align: center;
+  width: 100%;
+  padding: 8px 0 14px;
+  font-size: 21px;
+  font-weight: 600;
+  color: #b0b0b4;
+}
+.native-event {
+  border: 0;
+  border-left: 3px solid var(--event-color) !important;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--event-color) 25%, #151515) !important;
+  color: #fff !important;
+  text-align: left;
+  padding: 4px 6px !important;
+  overflow: hidden;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.native-event strong {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.native-event span {
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #ddd;
+}
+.month-events {
+  padding: 2px;
+  display: grid;
+  gap: 3px;
+}
+.month-events .native-event {
+  padding: 2px 3px !important;
+  max-width: 100%;
+  min-height: 19px;
+}
+.month-events .native-event strong {
+  font-size: 9px;
+}
+.month-events .native-event span {
+  display: none;
+}
+.native-calendar .more-events {
+  font-size: 10px;
+  color: #999;
+  padding: 3px;
+}
+.native-week-strip {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+.native-week-strip button {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 7px;
+  padding: 0 0 11px;
+  min-height: 66px;
+}
+.native-week-strip small {
+  font-size: 10px;
+  font-weight: 600;
+}
+.native-week-strip button > span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  line-height: 1;
+}
+.native-week-strip .selected-day {
+  background: #333;
+  border-radius: 50%;
+  color: #fff;
+}
+.native-week-strip h1 {
+  grid-column: 1/-1;
+  border-block: 1px solid #29292b;
+  padding: 10px 8px;
+  font:
+    600 15px/1.2 -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  text-transform: capitalize;
+}
+.native-timeline {
+  height: 1230px;
+  position: relative;
+  margin-top: 35px;
+}
+.hour-line {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 1px;
+}
+.hour-line > span {
+  width: 53px;
+  flex: none;
+  text-align: right;
+  color: #85858c;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  transform: translateY(-1px);
+}
+.hour-line > i {
+  display: block;
+  height: 1px;
+  background: #29292b;
+  flex: 1;
+}
+.timed-events {
+  position: absolute;
+  left: 63px;
+  right: 4px;
+  top: 0;
+  height: 1200px;
+}
+.now-line {
+  position: absolute;
+  height: 1.5px;
+  background: #ff414b;
+  left: 15px;
+  right: 0;
+  pointer-events: none;
+}
+.now-line > span {
+  position: absolute;
+  left: 0;
+  top: -8px;
+  background: #ff414b;
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.native-all-day {
+  display: flex;
+  gap: 12px;
+  align-items: start;
+  border-bottom: 1px solid #29292b;
+  padding: 10px 15px;
+  font-size: 11px;
+}
+.native-all-day > div {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+}
+.native-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 27px calc(15px + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, #0009);
+  pointer-events: none;
+  z-index: 5;
+}
+.native-bottom > .glass {
+  pointer-events: auto;
+}
+.native-calendar .today-control {
+  padding: 0 17px;
+  min-height: 48px;
+  font-size: 18px;
+  letter-spacing: -0.4px;
+}
+.bottom-actions {
+  min-height: 48px;
+  gap: 15px;
+  padding: 0 9px;
+}
+.invitation-dot {
+  position: absolute;
+  right: 10px;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  background: #ff414b;
+  border-radius: 50%;
+}
+.native-sync {
+  padding: 7px 20px;
+  font-size: 12px;
+  background: #252527;
+  color: #ddd;
+}
+.native-sync button {
+  text-decoration: underline;
+}
+.native-sheet {
+  border: 1px solid #353537;
+  border-radius: 24px 24px 0 0;
+  padding: 20px;
+  width: min(100% - 16px, 560px);
+  max-height: 85dvh;
+  margin: auto auto 0;
+  box-shadow: 0 -20px 80px #0007;
+  animation: sheet-appear 0.22s ease-out;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #171719;
+}
+.native-sheet::backdrop {
+  background: #0007;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  animation: calendar-fade 0.2s;
+}
+.native-sheet > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  gap: 12px;
+}
+.native-sheet > header h2 {
+  font-family: inherit;
+  font-size: 21px;
+  letter-spacing: -0.4px;
+}
+.native-sheet > header button {
+  border: 0;
+  background: #303033;
+  color: #eee;
+  border-radius: 22px;
+  padding: 10px 15px;
+  min-height: 44px;
+}
+.native-sheet .settings-card {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.native-sheet h2,
+.native-sheet h3 {
+  font-family: inherit;
+}
+.native-sheet input,
+.native-sheet select,
+.native-sheet textarea {
+  background: #252527 !important;
+  color: #fff !important;
+  border: 1px solid #424246 !important;
+  border-radius: 10px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px;
+}
+.native-sheet .family-bar {
+  margin: 0 0 18px;
+  border: 0;
+  background: #222225;
+  padding: 12px;
+}
+.native-sheet .family-bar .text-link {
+  display: none;
+}
+.sheet-options {
+  display: grid;
+  gap: 10px;
+}
+.sheet-options > button,
+.sheet-options > a {
+  padding: 14px;
+  background: #28282b;
+  border: 0;
+  border-radius: 13px;
+  color: #fff;
+  text-align: left;
+  min-height: 48px;
+}
+.sheet-options label,
+.native-search label {
+  display: grid;
+  gap: 10px;
+  font-size: 14px;
+}
+.search-results {
+  display: grid;
+  gap: 13px;
+  margin-top: 20px;
+}
+.search-results .native-event {
+  width: 100%;
+  margin-top: 5px;
+  min-height: 48px;
+}
+.calendar-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.calendar-tools a {
+  display: grid;
+  gap: 6px;
+  padding: 18px 15px;
+  background: #28282b;
+  border-radius: 17px;
+  min-height: 115px;
+}
+.calendar-tools svg {
+  margin-bottom: 5px;
+  color: #ff626b;
+}
+.calendar-tools a:nth-child(2) svg {
+  color: #f4bc59;
+}
+.calendar-tools a:nth-child(3) svg {
+  color: #b399ed;
+}
+.calendar-tools a:nth-child(4) svg {
+  color: #78caaa;
+}
+.calendar-tools a:nth-child(5) svg {
+  color: #8cbcf6;
+}
+.calendar-tools strong {
+  font-size: 17px;
+}
+.calendar-tools small {
+  font-size: 12px;
+  color: #aaa;
+}
+.native-calendar button,
+.calendar-tools a {
+  transition:
+    background-color 0.16s,
+    opacity 0.16s,
+    transform 0.16s;
+}
+.native-calendar button:active,
+.calendar-tools a:active {
+  opacity: 0.7;
+  transform: scale(0.97);
+}
+.return-calendar {
+  display: none;
+}
+.simple-shell .sidebar,
+.simple-shell > .bottom-nav,
+.simple-shell .topbar > .mobile-brand,
+.simple-shell .desktop-context,
+.simple-shell .preview-badge,
+.simple-shell .page-footer {
+  display: none;
+}
+.simple-shell .workspace {
+  margin: 0;
+}
+.simple-shell .topbar {
+  height: 64px;
+  padding: 0 22px;
+  border: 0;
+}
+.simple-shell .return-calendar {
+  display: inline-flex;
+  font-size: 18px;
+  font-weight: 600;
+  min-height: 44px;
+  align-items: center;
+}
+.simple-shell .main-content {
+  max-width: 900px;
+  margin: auto;
+  padding: 10px 22px 40px;
+  animation: calendar-fade 0.2s;
+}
+@keyframes calendar-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sheet-appear {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (min-width: 700px) {
+  .native-year-grid {
+    gap: 30px 50px;
+    padding: 20px 45px;
+  }
+  .mini-month h2 {
+    font-size: 24px;
+  }
+  .mini-grid {
+    font-size: 15px;
+  }
+  .native-calendar .mini-month {
+    min-height: 180px;
+  }
+  .native-topbar {
+    padding-inline: 30px;
+  }
+  .native-heading {
+    padding-inline: 35px;
+  }
+  .native-heading.year-heading {
+    margin-inline: 45px;
+  }
+  .native-sheet {
+    margin: auto;
+    border-radius: 24px;
+  }
+  .native-day {
+    min-height: 130px;
+  }
+  .month-events .native-event strong {
+    font-size: 12px;
+  }
+}
+@media (max-width: 360px) {
+  .native-year-grid {
+    column-gap: 9px;
+    padding-inline: 15px;
+  }
+  .mini-month h2 {
+    font-size: 16px;
+  }
+  .mini-grid {
+    font-size: 9px;
+  }
+  .native-topbar {
+    padding-inline: 10px;
+  }
+  .top-actions {
+    gap: 0;
+    padding: 0 4px;
+  }
+  .top-actions button {
+    min-width: 40px;
+  }
+  .native-calendar .back-control {
+    font-size: 16px;
+    padding-inline: 7px;
+  }
+  .native-bottom {
+    padding-inline: 15px;
+  }
+  .native-calendar .today-control {
+    font-size: 16px;
+  }
+  .bottom-actions {
+    gap: 5px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .native-scroll,
+  .native-sheet,
+  .native-sheet::backdrop,
+  .simple-shell .main-content {
+    animation: none;
+  }
+  .native-calendar button,
+  .calendar-tools a {
+    transition: none;
+  }
+}
+
+.calendar-shell .main-content {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.calendar-shell .pwa-status {
+  position: relative;
+  flex: none;
+  z-index: 6;
+}
+.native-calendar {
+  height: auto;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+.native-calendar .native-bottom .bottom-actions button {
+  color: #f5f5f7;
+}
+
+.native-sheet .compact-editor-heading {
+  display: none;
+}
+.event-options {
+  display: grid;
+  gap: 14px;
+}
+.event-options > summary {
+  padding: 12px 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+.event-options > label,
+.event-options > .field-pair {
+  margin-bottom: 14px;
+}
+.native-sheet .event-options {
+  border-block: 1px solid #343438;
+}
+.native-sheet .event-options > label {
+  display: grid;
+  gap: 6px;
+}
+.calendar-shell .pwa-status {
+  margin-bottom: 0;
+}
+.calendar-shell .status-notice,
+.calendar-shell .update-notice {
+  background: #252527;
+  color: #eee;
+  border-radius: 0;
+}

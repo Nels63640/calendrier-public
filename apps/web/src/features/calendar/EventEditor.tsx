@@ -19,12 +19,14 @@ export function EventEditor({
   date,
   custody,
   onClose,
+  compact = false,
 }: {
   record?: FamilyRecord<'event'>
   occurrence?: Occurrence
   date: string
   custody: boolean
   onClose: () => void
+  compact?: boolean
 }) {
   const family = useFamily(),
     account = useAccount(),
@@ -105,7 +107,7 @@ export function EventEditor({
   }
   return (
     <section className="settings-card event-editor" aria-labelledby="editor-title">
-      <div className="section-heading">
+      <div className={`section-heading${compact ? ' compact-editor-heading' : ''}`}>
         <h2 id="editor-title">
           {record
             ? 'Le détail de ce moment'
@@ -242,197 +244,211 @@ export function EventEditor({
               />
             </label>
           </div>
-          <label>
-            Fuseau horaire
-            <input
-              required
-              value={draft.timeZone}
-              maxLength={100}
-              onChange={(e) => patch('timeZone', e.target.value)}
-            />
-          </label>
-          <label>
-            Lieu
-            <input
-              value={draft.location}
-              maxLength={300}
-              onChange={(e) => patch('location', e.target.value)}
-            />
-          </label>
-          <label>
-            Description
-            <textarea
-              value={draft.description}
-              maxLength={4000}
-              onChange={(e) => patch('description', e.target.value)}
-            />
-          </label>
-          <div className="field-pair">
+          {compact && (
+            <p className="muted">
+              {draft.visibility === 'private'
+                ? 'Visible uniquement par vous.'
+                : draft.visibility === 'household'
+                  ? 'Partagé avec votre foyer.'
+                  : 'Partagé avec les personnes choisies.'}
+            </p>
+          )}
+          <details className="event-options" open={!compact}>
+            <summary>Répétition, partage et autres options</summary>
             <label>
-              Catégorie
-              <select
-                value={draft.categoryId ?? ''}
-                onChange={(e) => {
-                  const cat = categories.find((c) => c.id === e.target.value)
-                  setDraft({
-                    ...draft,
-                    categoryId: e.target.value || null,
-                    color: (cat?.payload as Category)?.color ?? draft.color,
-                  })
-                }}
-              >
-                <option value="">Sans catégorie</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.payload.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Couleur
+              Fuseau horaire
               <input
-                type="color"
-                value={draft.color}
-                onChange={(e) => patch('color', e.target.value)}
+                required
+                value={draft.timeZone}
+                maxLength={100}
+                onChange={(e) => patch('timeZone', e.target.value)}
               />
             </label>
-          </div>
-          {scope === 'series' && (
-            <>
+            <label>
+              Lieu
+              <input
+                value={draft.location}
+                maxLength={300}
+                onChange={(e) => patch('location', e.target.value)}
+              />
+            </label>
+            <label>
+              Description
+              <textarea
+                value={draft.description}
+                maxLength={4000}
+                onChange={(e) => patch('description', e.target.value)}
+              />
+            </label>
+            <div className="field-pair">
               <label>
-                Répétition
+                Catégorie
                 <select
-                  value={draft.recurrence?.frequency ?? ''}
-                  onChange={(e) =>
-                    patch(
-                      'recurrence',
-                      e.target.value
-                        ? {
-                            frequency: e.target.value as 'weekly',
-                            interval: 1,
-                            count: null,
-                            until: null,
-                          }
-                        : null,
-                    )
-                  }
+                  value={draft.categoryId ?? ''}
+                  onChange={(e) => {
+                    const cat = categories.find((c) => c.id === e.target.value)
+                    setDraft({
+                      ...draft,
+                      categoryId: e.target.value || null,
+                      color: (cat?.payload as Category)?.color ?? draft.color,
+                    })
+                  }}
                 >
-                  <option value="">Ne se répète pas</option>
-                  <option value="daily">Tous les jours</option>
-                  <option value="weekly">Toutes les semaines</option>
-                  <option value="monthly">Tous les mois</option>
-                  <option value="yearly">Tous les ans</option>
+                  <option value="">Sans catégorie</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.payload.title}
+                    </option>
+                  ))}
                 </select>
               </label>
-              {draft.recurrence && (
-                <>
-                  <div className="field-pair">
-                    <label>
-                      Intervalle
-                      <input
-                        type="number"
-                        min={1}
-                        max={52}
-                        required
-                        value={draft.recurrence.interval}
-                        onChange={(e) =>
-                          patch('recurrence', {
-                            ...draft.recurrence!,
-                            interval: Number(e.target.value),
-                          })
-                        }
-                      />
-                    </label>
-                    <label>
-                      Jusqu’au (facultatif)
-                      <input
-                        type="date"
-                        value={draft.recurrence.until?.slice(0, 10) ?? ''}
-                        onChange={(e) =>
-                          patch('recurrence', {
-                            ...draft.recurrence!,
-                            until: e.target.value ? e.target.value + 'T23:59' : null,
-                          })
-                        }
-                      />
-                    </label>
-                  </div>
-                  <p className="muted">
-                    L’heure locale est conservée lors des changements d’heure. Une date ou une heure
-                    inexistante/ambiguë est omise, sans déplacement automatique.
-                  </p>
-                </>
-              )}
               <label>
-                Qui peut voir ce moment ?
-                <select
-                  value={draft.visibility}
-                  onChange={(e) => patch('visibility', e.target.value as FamilyEvent['visibility'])}
-                >
-                  <option value="household">Tout le foyer</option>
-                  <option value="private">Seulement moi</option>
-                  <option value="selected">Certaines personnes</option>
-                </select>
+                Couleur
+                <input
+                  type="color"
+                  value={draft.color}
+                  onChange={(e) => patch('color', e.target.value)}
+                />
               </label>
-              {draft.visibility === 'selected' && (
-                <div className="member-choices">
-                  {family.snapshot.members
-                    .filter((m) => m.user_id !== account.user?.id)
-                    .map((m) => (
-                      <label className="check-label" key={m.user_id}>
+            </div>
+            {scope === 'series' && (
+              <>
+                <label>
+                  Répétition
+                  <select
+                    value={draft.recurrence?.frequency ?? ''}
+                    onChange={(e) =>
+                      patch(
+                        'recurrence',
+                        e.target.value
+                          ? {
+                              frequency: e.target.value as 'weekly',
+                              interval: 1,
+                              count: null,
+                              until: null,
+                            }
+                          : null,
+                      )
+                    }
+                  >
+                    <option value="">Ne se répète pas</option>
+                    <option value="daily">Tous les jours</option>
+                    <option value="weekly">Toutes les semaines</option>
+                    <option value="monthly">Tous les mois</option>
+                    <option value="yearly">Tous les ans</option>
+                  </select>
+                </label>
+                {draft.recurrence && (
+                  <>
+                    <div className="field-pair">
+                      <label>
+                        Intervalle
                         <input
-                          type="checkbox"
-                          checked={draft.viewers.includes(m.user_id)}
+                          type="number"
+                          min={1}
+                          max={52}
+                          required
+                          value={draft.recurrence.interval}
                           onChange={(e) =>
-                            patch(
-                              'viewers',
-                              e.target.checked
-                                ? [...draft.viewers, m.user_id]
-                                : draft.viewers.filter((id) => id !== m.user_id),
-                            )
+                            patch('recurrence', {
+                              ...draft.recurrence!,
+                              interval: Number(e.target.value),
+                            })
                           }
                         />
-                        {m.first_name}
                       </label>
-                    ))}
-                </div>
-              )}
-              <fieldset className="member-choices">
-                <legend>Personnes concernées (ne donne pas accès à l’événement)</legend>
-                {family.snapshot.members.map((m) => (
-                  <label className="check-label" key={m.user_id}>
-                    <input
-                      type="checkbox"
-                      checked={draft.people.includes(m.user_id)}
-                      onChange={(e) =>
-                        patch(
-                          'people',
-                          e.target.checked
-                            ? [...draft.people, m.user_id]
-                            : draft.people.filter((id) => id !== m.user_id),
-                        )
-                      }
-                    />
-                    {m.first_name}
-                  </label>
-                ))}
-              </fieldset>
-            </>
-          )}
-          <label>
-            Rappels, en minutes avant le début
-            <input
-              value={reminderInput}
-              onChange={(e) => setReminderInput(e.target.value)}
-              placeholder="0, 15, 60, 1440"
-              aria-describedby="reminder-help"
-            />
-          </label>
-          <p id="reminder-help" className="muted">
-            Jusqu’à 5 rappels. 1440 minutes = 24 heures. Activez les notifications dans votre
-            profil.
-          </p>
+                      <label>
+                        Jusqu’au (facultatif)
+                        <input
+                          type="date"
+                          value={draft.recurrence.until?.slice(0, 10) ?? ''}
+                          onChange={(e) =>
+                            patch('recurrence', {
+                              ...draft.recurrence!,
+                              until: e.target.value ? e.target.value + 'T23:59' : null,
+                            })
+                          }
+                        />
+                      </label>
+                    </div>
+                    <p className="muted">
+                      L’heure locale est conservée lors des changements d’heure. Une date ou une
+                      heure inexistante/ambiguë est omise, sans déplacement automatique.
+                    </p>
+                  </>
+                )}
+                <label>
+                  Qui peut voir ce moment ?
+                  <select
+                    value={draft.visibility}
+                    onChange={(e) =>
+                      patch('visibility', e.target.value as FamilyEvent['visibility'])
+                    }
+                  >
+                    <option value="household">Tout le foyer</option>
+                    <option value="private">Seulement moi</option>
+                    <option value="selected">Certaines personnes</option>
+                  </select>
+                </label>
+                {draft.visibility === 'selected' && (
+                  <div className="member-choices">
+                    {family.snapshot.members
+                      .filter((m) => m.user_id !== account.user?.id)
+                      .map((m) => (
+                        <label className="check-label" key={m.user_id}>
+                          <input
+                            type="checkbox"
+                            checked={draft.viewers.includes(m.user_id)}
+                            onChange={(e) =>
+                              patch(
+                                'viewers',
+                                e.target.checked
+                                  ? [...draft.viewers, m.user_id]
+                                  : draft.viewers.filter((id) => id !== m.user_id),
+                              )
+                            }
+                          />
+                          {m.first_name}
+                        </label>
+                      ))}
+                  </div>
+                )}
+                <fieldset className="member-choices">
+                  <legend>Personnes concernées (ne donne pas accès à l’événement)</legend>
+                  {family.snapshot.members.map((m) => (
+                    <label className="check-label" key={m.user_id}>
+                      <input
+                        type="checkbox"
+                        checked={draft.people.includes(m.user_id)}
+                        onChange={(e) =>
+                          patch(
+                            'people',
+                            e.target.checked
+                              ? [...draft.people, m.user_id]
+                              : draft.people.filter((id) => id !== m.user_id),
+                          )
+                        }
+                      />
+                      {m.first_name}
+                    </label>
+                  ))}
+                </fieldset>
+              </>
+            )}
+            <label>
+              Rappels, en minutes avant le début
+              <input
+                value={reminderInput}
+                onChange={(e) => setReminderInput(e.target.value)}
+                placeholder="0, 15, 60, 1440"
+                aria-describedby="reminder-help"
+              />
+            </label>
+            <p id="reminder-help" className="muted">
+              Jusqu’à 5 rappels. 1440 minutes = 24 heures. Activez les notifications dans votre
+              profil.
+            </p>
+          </details>
           <button className="button primary">
             {action.busy ? 'Enregistrement…' : 'Enregistrer l’événement'}
           </button>

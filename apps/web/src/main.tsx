@@ -12,6 +12,7 @@ import './styles/pwa.css'
 import './styles/theme.css'
 import './styles/layout.css'
 import './styles/components.css'
+import './styles/calendar-native.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

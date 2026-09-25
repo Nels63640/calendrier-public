@@ -1,3 +1,7 @@
+# Navigation centrée sur le calendrier
+
+L’utilisateur remplace le tableau de bord d’accueil par le calendrier après connexion. Référence visuelle : ses trois captures année/mois/journée sombres. Les fonctions secondaires sont accessibles dans un menu illustré, avec libellés et retour direct ; la simplicité prime sur les panneaux permanents.
+
 # Décisions actuelles
 
 25 septembre 2026 : l’utilisateur autorise toutes les phases restantes et le déploiement, fournit son projet Supabase et choisit GitHub Pages. Ces décisions remplacent les pauses entre phases et l’hébergement initialement envisagé. La base est installée manuellement, faute de connexion administrative. Aucun SMTP disponible.

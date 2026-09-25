@@ -1,3 +1,15 @@
+# Nouvelle interface calendrier : 25 septembre 2026
+
+L’utilisateur demande une interface reprenant ses captures iPhone, puis précise que le calendrier doit être la page principale après connexion. Accueil connecté et sorties de connexion/confirmation/récupération ouvrent désormais le calendrier. L’ancien tableau de bord ne sert plus d’accueil.
+
+Vues année à 12 mois, mois et journée horaire, fond noir et accent rouge. Menu à grandes icônes pour tâches, courses, garde, famille et profil ; retour au calendrier depuis les rubriques. Recherche annuelle sur les événements visibles, ajout et édition en volet, options détaillées repliées. Gestes horizontaux pour changer de période, fondu et ouverture douce respectant la réduction des animations. Aucune barre système iPhone fictive.
+
+Les données et permissions Supabase restent utilisées. Pas de modification de la base. Les invitations ne déclenchent toujours aucun e-mail et les rappels serveur restent non déployés.
+
+Recette : captures à 402×874 examinées ; parcours existants validés et nouveau parcours année/mois/jour, création réelle en base de test, recherche et menu testé sur Chromium et WebKit. Publication de cette version en cours.
+
+## Historique
+
 # État actuel : 25 septembre 2026
 
 L’utilisateur autorise la réalisation et la publication de toutes les phases. Hébergement choisi : GitHub Pages, dépôt Nels63640/calendrier-public.

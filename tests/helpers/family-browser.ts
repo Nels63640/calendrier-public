@@ -87,5 +87,5 @@ export async function login(page: Page, email = 'alice@example.test') {
   await page.getByLabel('Adresse e-mail').fill(email)
   await page.getByLabel('Mot de passe', { exact: true }).fill('longue-phrase-de-test')
   await page.getByRole('button', { name: 'Se connecter', exact: true }).click()
-  await page.getByLabel('Prénom', { exact: true }).waitFor()
+  await page.getByRole('button', { name: 'Ouvrir le menu', exact: true }).waitFor()
 }
