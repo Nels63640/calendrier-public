@@ -4,7 +4,7 @@ Signalement utilisateur : Aujourd’hui revient sur 2027 et le défilement s’i
 
 Le chargement anticipé ajoute quatre périodes en fin sans écrire la position de défilement. Préchargement de cinq périodes précédentes ; compensation et recyclage uniquement après 220 ms sans mouvement et sans contact tactile. Fenêtre au repos limitée à 10 années ou 16 mois/jours, temporairement extensible pendant le geste. Le test instrumenté vérifie l’absence de scrollTo/scrollBy pendant un geste simulé ; la fluidité tactile physique reste à confirmer.
 
-Recette et publication du correctif à consigner après validation.
+Validation : npm run check et format réussis, 27 tests unitaires et 72 tests navigateur. Déploiement 53f5a97 réussi, workflow GitHub 36197060509. Contrôle public Chromium à 402 × 720, horloge fixée au 26 septembre 2026 : après navigation vers 2027, Aujourd’hui affiche 2026 et le 26 visible avec fond rouge rgb(255, 65, 75).
 
 ## Historique
 
