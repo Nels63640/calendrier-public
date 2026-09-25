@@ -6,7 +6,7 @@ Vues année à 12 mois, mois et journée horaire, fond noir et accent rouge. Men
 
 Les données et permissions Supabase restent utilisées. Pas de modification de la base. Les invitations ne déclenchent toujours aucun e-mail et les rappels serveur restent non déployés.
 
-Recette : captures à 402×874 examinées ; parcours existants validés et nouveau parcours année/mois/jour, création réelle en base de test, recherche et menu testé sur Chromium et WebKit. Publication de cette version en cours.
+Recette : captures à 402×874 examinées ; parcours existants validés et nouveau parcours année/mois/jour, création réelle en base de test, recherche et menu testé sur Chromium et WebKit. Publication réussie : commit 05dcc6a, workflow GitHub 36192713865. npm run check et format réussis : 27 tests unitaires et 60 tests navigateur. Menu de la version publique contrôlé dans Chromium à 402×874, sans erreur JavaScript. La réception sur iPhone physique reste à vérifier par l’utilisateur.
 
 ## Historique
 
