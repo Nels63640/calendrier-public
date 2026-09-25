@@ -15,19 +15,13 @@ test('navigation, lien profond et retour vers l’accueil', async ({ page }) => 
   expect(errors).toEqual([])
 })
 
-test('le thème suit le système et conserve un choix explicite', async ({ page }) => {
-  await page.emulateMedia({ colorScheme: 'dark' })
-  await page.goto('/profil')
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
-  await page.getByRole('radio', { name: /Clair/ }).check()
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
-  await page.reload()
-  await expect(page.getByRole('radio', { name: /Clair/ })).toBeChecked()
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
-  await page.getByRole('radio', { name: /Automatique/ }).check()
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+test('la palette noire et rouge reste identique sur les rubriques', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' })
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+  for (const path of ['/profil', '/foyer', '/taches', '/courses', '/garde', '/calendrier']) {
+    await page.goto(path)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
+  }
 })
 
 test('le thème reste utilisable quand le stockage est refusé', async ({ page }) => {
@@ -40,7 +34,6 @@ test('le thème reste utilisable quand le stockage est refusé', async ({ page }
     }
   })
   await page.goto('/profil')
-  await page.getByRole('radio', { name: /Sombre/ }).check()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 })
 

@@ -20,7 +20,7 @@ test('accueil calendrier, année-mois-jour, événement réel, recherche et menu
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('septembre')
     await page.getByRole('button', { name: 'Voir le 2026-09-25', exact: true }).click()
     await expect(page.getByRole('heading', { level: 1 })).toContainText('vendredi')
-    await expect(page.locator('.hour-line')).toHaveCount(25)
+    await expect(page.locator('[data-day="2026-09-25"] .hour-line')).toHaveCount(25)
     await page.getByRole('button', { name: 'Ajouter un événement' }).click()
     await page.getByLabel('Titre', { exact: true }).fill('Sortie au parc')
     await page.getByRole('button', { name: 'Enregistrer l’événement' }).click()

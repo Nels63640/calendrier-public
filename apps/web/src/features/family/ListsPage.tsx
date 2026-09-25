@@ -63,7 +63,8 @@ export function ListsPage({ kind }: { kind: 'shopping' | 'task' }) {
                 <input name="title" required maxLength={120} defaultValue={value?.title} />
               </label>
               {tasks ? (
-                <>
+                <details className="form-options" open={Boolean(editing)}>
+                  <summary>Ajouter des détails</summary>
                   <label>
                     Description
                     <textarea
@@ -121,7 +122,7 @@ export function ListsPage({ kind }: { kind: 'shopping' | 'task' }) {
                       <option value="1440">24 heures avant</option>
                     </select>
                   </label>
-                </>
+                </details>
               ) : (
                 <div className="field-pair">
                   <label>

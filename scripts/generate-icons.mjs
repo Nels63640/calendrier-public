@@ -18,7 +18,7 @@ try {
     })
     const mark = maskable ? svg.replace('rx="19"', 'rx="0"') : svg
     await page.setContent(
-      `<html><head><style>html,body{margin:0;background:#315748}svg{width:100vw;height:100vh}</style></head><body>${mark}</body></html>`,
+      `<html><head><style>html,body{margin:0;background:#101012}svg{width:100vw;height:100vh}</style></head><body>${mark}</body></html>`,
     )
     await page.screenshot({
       path: new URL(`${name}.png`, output).pathname.replace(/^\/([A-Za-z]:)/, '$1'),

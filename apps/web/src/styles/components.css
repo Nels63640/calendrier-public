@@ -324,7 +324,7 @@
   overflow-y: auto;
 }
 .quick-dialog::backdrop {
-  background: #13281ed0;
+  background: #000000b8;
 }
 .dialog-top {
   display: flex;

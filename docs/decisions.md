@@ -43,3 +43,13 @@ L’utilisateur remplace le tableau de bord d’accueil par le calendrier après
 - Session SDK persistée, profil uniquement en mémoire ; vérification getUser et génération de requête pour empêcher le retour d’un ancien profil après déconnexion. Portée de déconnexion locale explicite.
 - PGlite 0.5.8 exécute la vraie migration et les permissions PostgreSQL avec un contrat auth minimal. Ce test ne remplace pas Supabase Auth/PostgREST.
 - Build auth-test séparé avec valeurs factices et interceptions HTTP Playwright. Il ne doit jamais être déployé ; les tests ordinaires restent sur le build sans raccordement.
+
+## 26 septembre 2026 — Palette et navigation temporelle
+
+La demande explicite de noir et rouge sur toutes les pages remplace le choix clair/sombre/système. Les réglages secondaires passent dans des sections repliables. Le calendrier conserve l’accueil connecté et les menus à icônes.
+
+Le défilement vertical recycle un nombre borné de périodes et préserve leur position visible. Années, mois et journées utilisent le même composant. Limites explicites : année 0 (numérotation astronomique) à 275759, dernière année complète du moteur Temporal. Le menu propose un accès direct par année pour éviter des milliers de gestes. Le zoom année-vers-mois utilise les rectangles réels et Web Animations ; il est désactivé en réduction des animations.
+
+## 26 septembre 2026 — Sélection de périodes
+
+Deux jours cochés au minimum activent la création. Une période est continue, du premier au dernier jour inclus ; le compteur distingue les jours cochés des jours couverts. Le formulaire préremplit une journée entière avec fin exclusive en stockage, propose garde/vacances/vacances scolaires/autre et conserve les droits de partage existants. La garde sélectionnée utilise les bornes choisies sans appliquer le modèle automatique une semaine sur deux. Aucun import de calendrier scolaire dans cette demande.

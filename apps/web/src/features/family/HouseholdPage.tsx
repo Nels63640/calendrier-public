@@ -39,57 +39,68 @@ export function HouseholdPage() {
         </section>
       ) : (
         <>
-          <div className="family-columns">
-            <section className="settings-card">
-              <h2>Créer un foyer</h2>
-              <form
-                className="account-form"
-                onSubmit={(e) =>
-                  submit(e, async (data) => {
-                    const id = await rpc<string>('create_household', { p_name: data.get('name') })
-                    await family.refresh()
-                    family.select(id)
-                  })
-                }
-              >
-                <fieldset disabled={action.busy}>
-                  <label>
-                    Nom du foyer
-                    <input
-                      name="name"
-                      required
-                      maxLength={100}
-                      placeholder="Le nom de votre famille"
-                    />
-                  </label>
-                  <button className="button primary">Créer le foyer</button>
-                </fieldset>
-              </form>
-            </section>
-            <section className="settings-card">
-              <h2>Rejoindre un foyer</h2>
-              <form
-                className="account-form"
-                onSubmit={(e) =>
-                  submit(e, async (data) => {
-                    const id = await rpc<string>('accept_invitation', {
-                      p_token: String(data.get('code')).trim(),
+          <details className="page-fold" open={!household}>
+            <summary>
+              {household ? 'Créer ou rejoindre un autre foyer' : 'Créer ou rejoindre un foyer'}
+            </summary>
+            <div className="family-columns">
+              <section className="settings-card">
+                <h2>Créer un foyer</h2>
+                <form
+                  className="account-form"
+                  onSubmit={(e) =>
+                    submit(e, async (data) => {
+                      const id = await rpc<string>('create_household', { p_name: data.get('name') })
+                      await family.refresh()
+                      family.select(id)
                     })
-                    await family.refresh()
-                    family.select(id)
-                  })
-                }
-              >
-                <fieldset disabled={action.busy}>
-                  <label>
-                    Code d’invitation
-                    <input name="code" required minLength={64} maxLength={64} autoComplete="off" />
-                  </label>
-                  <button className="button primary">Rejoindre le foyer</button>
-                </fieldset>
-              </form>
-            </section>
-          </div>
+                  }
+                >
+                  <fieldset disabled={action.busy}>
+                    <label>
+                      Nom du foyer
+                      <input
+                        name="name"
+                        required
+                        maxLength={100}
+                        placeholder="Le nom de votre famille"
+                      />
+                    </label>
+                    <button className="button primary">Créer le foyer</button>
+                  </fieldset>
+                </form>
+              </section>
+              <section className="settings-card">
+                <h2>Rejoindre un foyer</h2>
+                <form
+                  className="account-form"
+                  onSubmit={(e) =>
+                    submit(e, async (data) => {
+                      const id = await rpc<string>('accept_invitation', {
+                        p_token: String(data.get('code')).trim(),
+                      })
+                      await family.refresh()
+                      family.select(id)
+                    })
+                  }
+                >
+                  <fieldset disabled={action.busy}>
+                    <label>
+                      Code d’invitation
+                      <input
+                        name="code"
+                        required
+                        minLength={64}
+                        maxLength={64}
+                        autoComplete="off"
+                      />
+                    </label>
+                    <button className="button primary">Rejoindre le foyer</button>
+                  </fieldset>
+                </form>
+              </section>
+            </div>
+          </details>
           {household && (
             <>
               <section className="settings-card">
@@ -176,8 +187,8 @@ export function HouseholdPage() {
                 </ul>
               </section>
               {admin && (
-                <section className="settings-card">
-                  <h2>Inviter un proche</h2>
+                <details className="page-fold">
+                  <summary>Inviter un proche</summary>
                   <p>
                     Le code est utilisable une seule fois pendant 7 jours. Transmettez-le à la
                     personne de votre choix.
@@ -244,11 +255,11 @@ export function HouseholdPage() {
                         </li>
                       ))}
                   </ul>
-                </section>
+                </details>
               )}
               {(['child', 'category'] as const).map((kind) => (
-                <section className="settings-card" key={kind}>
-                  <h2>{kind === 'child' ? 'Les enfants' : 'Les catégories'}</h2>
+                <details className="page-fold" key={kind}>
+                  <summary>{kind === 'child' ? 'Les enfants' : 'Les catégories'}</summary>
                   <p className="muted">
                     {kind === 'child'
                       ? 'Seulement un prénom, une couleur et une illustration. Aucun compte enfant nécessaire.'
@@ -300,7 +311,7 @@ export function HouseholdPage() {
                         </label>
                         <label>
                           Couleur
-                          <input type="color" name="color" defaultValue="#527a60" />
+                          <input type="color" name="color" defaultValue="#ff414b" />
                         </label>
                         {kind === 'child' && (
                           <label>
@@ -319,10 +330,10 @@ export function HouseholdPage() {
                       </fieldset>
                     </form>
                   )}
-                </section>
+                </details>
               ))}
-              <section className="settings-card">
-                <h2>Gérer votre participation</h2>
+              <details className="page-fold">
+                <summary>Gérer votre participation</summary>
                 {role !== 'owner' ? (
                   <details>
                     <summary>Quitter ce foyer</summary>
@@ -368,7 +379,7 @@ export function HouseholdPage() {
                     </form>
                   </details>
                 )}
-              </section>
+              </details>
             </>
           )}
         </>

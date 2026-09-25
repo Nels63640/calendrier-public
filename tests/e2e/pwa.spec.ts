@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test('le manifest et les icônes rendent la PWA installable', async ({ page, request }) => {
   await page.goto('/profil')
+  await page.getByText('Installer l’application', { exact: true }).click()
   const manifestUrl = await page.locator('link[rel="manifest"]').getAttribute('href')
   const response = await request.get(manifestUrl!)
   const manifest = await response.json()
@@ -26,6 +27,7 @@ test('le manifest et les icônes rendent la PWA installable', async ({ page, req
 
 test('la navigation interne suit les changements de connexion', async ({ page, context }) => {
   await page.goto('/profil')
+  await page.getByText('Installer l’application', { exact: true }).click()
   await expect(
     page.getByText(/L’interface est prête à être consultée hors connexion/),
   ).toBeVisible()

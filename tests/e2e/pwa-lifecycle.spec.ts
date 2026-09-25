@@ -30,6 +30,7 @@ test('les liens directs fonctionnent même lorsque le serveur est arrêté', asy
   const server = await appServer()
   try {
     await page.goto(`${server.origin}/profil`)
+    await page.getByText('Installer l’application', { exact: true }).click()
     await expect(
       page.getByText(/L’interface est prête à être consultée hors connexion/),
     ).toBeVisible()

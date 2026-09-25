@@ -8,7 +8,7 @@ export function blankEvent(date: string, timeZone: string): FamilyEvent {
     end: date + 'T10:00',
     timeZone,
     allDay: false,
-    color: '#527a60',
+    color: '#ff414b',
     visibility: 'household',
     viewers: [],
     people: [],

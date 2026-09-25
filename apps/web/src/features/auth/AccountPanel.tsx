@@ -134,7 +134,12 @@ export function AccountPanel() {
         </p>
       )}
       {account.user && <p className="account-email">{account.user.email}</p>}
-      {account.profile && <ProfileEditor key={account.profile.id} profile={account.profile} />}
+      {account.profile && (
+        <details className="profile-edit">
+          <summary>Modifier mon profil</summary>
+          <ProfileEditor key={account.profile.id} profile={account.profile} />
+        </details>
+      )}
       {account.user && !account.profile && !account.profileError && (
         <p role="status">Chargement du profil…</p>
       )}

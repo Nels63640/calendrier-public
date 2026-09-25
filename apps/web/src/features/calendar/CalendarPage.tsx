@@ -1,15 +1,19 @@
-﻿import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+﻿import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Temporal } from '@js-temporal/polyfill'
 import { Link } from 'react-router'
 import { useAccount } from '../auth/auth-context'
 import { useFamily } from '../family/family-context'
 import { FamilyBar, FamilyGate } from '../family/FamilyShell'
-import { expandEvent, calendarWindow } from '../../../../../packages/domain/src/recurrence'
+import { expandEvent } from '../../../../../packages/domain/src/recurrence'
 import type { FamilyRecord, Occurrence } from '../../../../../packages/domain/src/family'
 import { EventEditor } from './EventEditor'
 import { CustodyCalendarPage } from './CustodyCalendarPage'
 import { CalendarSheet } from './CalendarSheet'
 import { Icon } from '../../components/Icon'
+import { useMonthZoom } from './useMonthZoom'
+import { MonthStream } from './MonthStream'
+import { CalendarStream } from './CalendarStream'
+import { DayBlock } from './DayBlock'
 
 type View = 'year' | 'month' | 'day'
 const week = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
@@ -58,14 +62,37 @@ function NativeCalendar() {
   const today = now.toPlainDate()
   const [date, setDate] = useState(() => today)
   const [view, setView] = useState<View>('year')
+  const [selecting, setSelecting] = useState(false)
+  const [selected, setSelected] = useState<string[]>([])
+  const selectedDates = [...selected].sort((a, b) => Temporal.PlainDate.compare(a, b))
+  function endSelection() {
+    setSelecting(false)
+    setSelected([])
+  }
+  const [monthVisit, setMonthVisit] = useState(0)
+  const [caption, setCaption] = useState<{ anchor: string; month: Temporal.PlainDate } | null>(null)
+  const dateKey = date.toString()
+  const visibleMonth = caption?.anchor === dateKey ? caption.month : date
+  const onVisibleMonth = useCallback(
+    (month: Temporal.PlainDate) => {
+      setCaption((previous) =>
+        previous?.anchor === dateKey && previous.month.equals(month)
+          ? previous
+          : { anchor: dateKey, month },
+      )
+    },
+    [dateKey],
+  )
   const [sheet, setSheet] = useState<'search' | 'views' | 'calendars' | 'family' | null>(null)
   const [query, setQuery] = useState('')
   const [editor, setEditor] = useState<{
     record?: FamilyRecord<'event'>
     occurrence?: Occurrence
     date: string
+    periodEnd?: string
   } | null>(null)
   const scroll = useRef<HTMLDivElement>(null)
+  const prepareMonthZoom = useMonthZoom(view, date.toString(), scroll)
   const touch = useRef<{ x: number; y: number } | null>(null)
   useEffect(() => {
     const id = setInterval(() => setNow(Temporal.Now.zonedDateTimeISO(zone)), 30000)
@@ -79,18 +106,13 @@ function NativeCalendar() {
       color?.setAttribute('content', previous)
     }
   }, [])
-  useEffect(() => {
-    if (scroll.current)
-      scroll.current.scrollTop =
-        view === 'day' ? Math.max(0, (date.equals(today) ? now.hour - 1 : 8) * 50) : 0
-    // Le défilement dépend de la navigation, pas de chaque minute de l’horloge.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, date.toString()])
   const records = useMemo(
     () => family.snapshot.records.filter((r) => r.kind === 'event') as FamilyRecord<'event'>[],
     [family.snapshot.records],
   )
-  const first = date.with(sheet === 'search' || view === 'year' ? { month: 1, day: 1 } : { day: 1 })
+  const first = visibleMonth.with(
+    sheet === 'search' || view === 'year' ? { month: 1, day: 1 } : { day: 1 },
+  )
   const end = first.add(sheet === 'search' || view === 'year' ? { years: 1 } : { months: 2 })
   const from = first.toZonedDateTime(zone).toInstant().toString(),
     to = end.toZonedDateTime(zone).toInstant().toString()
@@ -101,14 +123,6 @@ function NativeCalendar() {
         .sort((a, b) => a.startInstant.localeCompare(b.startInstant)),
     [records, family.snapshot.exceptions, from, to],
   )
-  function onDay(day: Temporal.PlainDate) {
-    const range = calendarWindow(day.toString(), 'day', zone)
-    return occurrences.filter((o) =>
-      o.event.allDay
-        ? o.start.slice(0, 10) <= day.toString() && o.end.slice(0, 10) > day.toString()
-        : o.startInstant < range.to && o.endInstant > range.from,
-    )
-  }
   function open(o: Occurrence) {
     setSheet(null)
     setEditor({
@@ -118,15 +132,21 @@ function NativeCalendar() {
     })
   }
   function move(direction: number) {
-    setDate(
-      date.add(
-        view === 'year'
-          ? { years: direction }
-          : view === 'month'
-            ? { months: direction }
-            : { days: direction },
-      ),
+    if (
+      view === 'year' &&
+      (visibleMonth.year + direction < 0 || visibleMonth.year + direction > 275759)
     )
+      return
+    const next = visibleMonth.add(
+      view === 'year'
+        ? { years: direction }
+        : view === 'month'
+          ? { months: direction }
+          : { days: direction },
+    )
+    if (next.year < 0 || next.year > 275759) return
+    setDate(next)
+    setMonthVisit((v) => v + 1)
   }
   function eventButton(o: Occurrence, style?: CSSProperties) {
     return (
@@ -155,7 +175,8 @@ function NativeCalendar() {
         className="mini-month"
         key={month.month}
         aria-label={monthLabel(month) + ' ' + month.year}
-        onClick={() => {
+        onClick={(event) => {
+          prepareMonthZoom(event.currentTarget)
           setDate(month)
           setView('month')
         }}
@@ -176,83 +197,7 @@ function NativeCalendar() {
       </button>
     )
   }
-  function largeMonth(month: Temporal.PlainDate, next = false) {
-    return (
-      <section key={month.toString()} aria-label={monthLabel(month) + ' ' + month.year}>
-        {next && (
-          <button className="next-month-title" onClick={() => setDate(month)}>
-            {monthLabel(month)}
-          </button>
-        )}
-        <div className="native-month-grid">
-          {Array.from({ length: month.dayOfWeek - 1 }, (_, i) => (
-            <div className="native-day blank" key={'empty' + i} />
-          ))}
-          {datesInMonth(month).map((day) => {
-            const events = onDay(day)
-            return (
-              <div key={day.day} className={`native-day ${day.dayOfWeek > 5 ? 'weekend' : ''}`}>
-                <button
-                  className={`native-date ${day.equals(today) ? 'today' : ''}`}
-                  aria-label={'Voir le ' + day.toString()}
-                  onClick={() => {
-                    setDate(day)
-                    setView('day')
-                  }}
-                >
-                  {day.day}
-                </button>
-                <div className="month-events">
-                  {events.slice(0, 2).map((o) => eventButton(o))}
-                  {events.length > 2 && (
-                    <button
-                      className="more-events"
-                      onClick={() => {
-                        setDate(day)
-                        setView('day')
-                      }}
-                    >
-                      +{events.length - 2}
-                    </button>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-    )
-  }
-  const weekStart = date.subtract({ days: date.dayOfWeek - 1 })
-  const dayEvents = onDay(date)
-  const timed = dayEvents
-    .filter((o) => !o.event.allDay)
-    .map((o) => {
-      const a = Temporal.Instant.from(o.startInstant).toZonedDateTimeISO(zone),
-        b = Temporal.Instant.from(o.endInstant).toZonedDateTimeISO(zone)
-      const start = a.toPlainDate().equals(date) ? a.hour * 60 + a.minute : 0
-      const finish = b.toPlainDate().equals(date) ? b.hour * 60 + b.minute : 1440
-      return { o, start, finish, lane: 0, columns: 1 }
-    })
-    .sort((a, b) => a.start - b.start || b.finish - a.finish)
-  // Une colonne par événement simultané, sans masquer les rendez-vous qui se chevauchent.
-  for (let index = 0; index < timed.length;) {
-    let endIndex = index + 1,
-      groupEnd = timed[index]!.finish
-    while (endIndex < timed.length && timed[endIndex]!.start < groupEnd) {
-      groupEnd = Math.max(groupEnd, timed[endIndex]!.finish)
-      endIndex++
-    }
-    const lanes: number[] = []
-    for (let j = index; j < endIndex; j++) {
-      let lane = lanes.findIndex((end) => end <= timed[j]!.start)
-      if (lane < 0) lane = lanes.length
-      lanes[lane] = timed[j]!.finish
-      timed[j]!.lane = lane
-    }
-    for (let j = index; j < endIndex; j++) timed[j]!.columns = lanes.length
-    index = endIndex
-  }
+  const weekStart = visibleMonth.subtract({ days: visibleMonth.dayOfWeek - 1 })
   return (
     <div className="native-calendar">
       <header className="native-topbar">
@@ -260,29 +205,49 @@ function NativeCalendar() {
           <button
             className="glass back-control"
             aria-label={view === 'month' ? 'Afficher l’année' : 'Afficher le mois'}
-            onClick={() => setView(view === 'day' ? 'month' : 'year')}
+            onClick={() => {
+              endSelection()
+              setDate(visibleMonth)
+              setView(view === 'day' ? 'month' : 'year')
+            }}
           >
             <Glyph name="back" />
-            <span>{view === 'month' ? date.year : monthLabel(date)}</span>
+            <span>{view === 'month' ? visibleMonth.year : monthLabel(visibleMonth)}</span>
           </button>
         ) : (
           <span />
         )}
         <div className="glass top-actions">
-          {view !== 'year' && (
+          {view !== 'year' && !selecting && (
             <button aria-label="Choisir une vue" onClick={() => setSheet('views')}>
               <Glyph name="view" />
             </button>
           )}
-          <button aria-label="Rechercher un événement" onClick={() => setSheet('search')}>
-            <Glyph name="search" />
-          </button>
-          <button
-            aria-label="Ajouter un événement"
-            onClick={() => setEditor({ date: date.toString() })}
-          >
-            <Glyph name="plus" />
-          </button>
+          {view === 'month' && (
+            <button
+              className="select-toggle"
+              aria-pressed={selecting}
+              onClick={() => {
+                if (selecting) endSelection()
+                else setSelecting(true)
+              }}
+            >
+              {selecting ? 'Annuler' : 'Sélect.'}
+            </button>
+          )}
+          {!selecting && (
+            <>
+              <button aria-label="Rechercher un événement" onClick={() => setSheet('search')}>
+                <Glyph name="search" />
+              </button>
+              <button
+                aria-label="Ajouter un événement"
+                onClick={() => setEditor({ date: visibleMonth.toString() })}
+              >
+                <Glyph name="plus" />
+              </button>
+            </>
+          )}
         </div>
       </header>
       {view === 'day' ? (
@@ -294,24 +259,33 @@ function NativeCalendar() {
                 key={i}
                 className={i > 4 ? 'weekend' : ''}
                 aria-label={'Voir le ' + d.toString()}
-                aria-pressed={d.equals(date)}
-                onClick={() => setDate(d)}
+                aria-pressed={d.equals(visibleMonth)}
+                disabled={d.year < 0 || d.year > 275759}
+                onClick={() => {
+                  setDate(d)
+                  setMonthVisit((v) => v + 1)
+                }}
               >
                 <small>{label}</small>
-                <span className={d.equals(today) ? 'today' : d.equals(date) ? 'selected-day' : ''}>
+                <span
+                  className={
+                    d.equals(today) ? 'today' : d.equals(visibleMonth) ? 'selected-day' : ''
+                  }
+                >
                   {d.day}
                 </span>
               </button>
             )
           })}
           <h1 tabIndex={-1}>
-            {date.toLocaleString('fr', { weekday: 'long' })} -{' '}
-            {date.toLocaleString('fr', { day: 'numeric', month: 'short', year: 'numeric' })}
+            {visibleMonth.toLocaleString('fr', { weekday: 'long' })} -{' '}
+            {visibleMonth.toLocaleString('fr', { day: 'numeric', month: 'short' })}{' '}
+            {visibleMonth.year}
           </h1>
         </div>
       ) : (
         <div className={`native-heading ${view === 'year' ? 'year-heading' : ''}`}>
-          <h1 tabIndex={-1}>{view === 'year' ? date.year : monthLabel(date)}</h1>
+          <h1 tabIndex={-1}>{view === 'year' ? visibleMonth.year : monthLabel(visibleMonth)}</h1>
           <div className="period-controls">
             <button aria-label="Période précédente" onClick={() => move(-1)}>
               <Glyph name="back" />
@@ -338,7 +312,7 @@ function NativeCalendar() {
         </div>
       )}
       <div
-        key={view + date.toString()}
+        key={view + date.toString() + monthVisit}
         className={`native-scroll ${view}-scroll`}
         ref={scroll}
         onTouchStart={(e) => {
@@ -353,78 +327,125 @@ function NativeCalendar() {
         }}
       >
         {view === 'year' && (
-          <>
-            <div className="native-year-grid">
-              {Array.from({ length: 12 }, (_, i) => miniMonth(date.with({ month: i + 1, day: 1 })))}
-            </div>
-            <button className="next-year" onClick={() => move(1)}>
-              {date.year + 1}
-            </button>
-          </>
+          <CalendarStream
+            anchor={date.with({ month: 1, day: 1 })}
+            scroll={scroll}
+            onVisible={onVisibleMonth}
+            unit="years"
+          >
+            {(year) => (
+              <section
+                className="stream-year"
+                data-year={year.year}
+                data-current-year={year.year === date.year ? '' : undefined}
+              >
+                <h2 className="stream-year-title">{year.year}</h2>
+                <div className="native-year-grid">
+                  {Array.from({ length: 12 }, (_, i) =>
+                    miniMonth(year.with({ month: i + 1, day: 1 })),
+                  )}
+                </div>
+              </section>
+            )}
+          </CalendarStream>
         )}
         {view === 'month' && (
-          <>
-            {largeMonth(date.with({ day: 1 }))}
-            {largeMonth(date.with({ day: 1 }).add({ months: 1 }), true)}
-          </>
+          <MonthStream
+            anchor={date}
+            today={today}
+            zone={zone}
+            records={records}
+            exceptions={family.snapshot.exceptions}
+            scroll={scroll}
+            onVisible={onVisibleMonth}
+            selecting={selecting}
+            selected={selected}
+            onSelect={(day) => {
+              if (selecting) {
+                const key = day.toString()
+                setSelected((previous) =>
+                  previous.includes(key)
+                    ? previous.filter((value) => value !== key)
+                    : [...previous, key],
+                )
+                return
+              }
+              setDate(day)
+              setView('day')
+            }}
+            renderEvent={(o) => eventButton(o)}
+          />
         )}
         {view === 'day' && (
-          <>
-            {dayEvents.some((o) => o.event.allDay) && (
-              <div className="native-all-day">
-                <span>Journée</span>
-                <div>{dayEvents.filter((o) => o.event.allDay).map((o) => eventButton(o))}</div>
-              </div>
+          <CalendarStream
+            anchor={date}
+            unit="days"
+            scroll={scroll}
+            onVisible={onVisibleMonth}
+            initialOffset={35 + Math.max(0, date.equals(today) ? now.hour - 1 : 8) * 50}
+          >
+            {(day) => (
+              <DayBlock
+                date={day}
+                today={today}
+                now={now}
+                zone={zone}
+                records={records}
+                exceptions={family.snapshot.exceptions}
+                renderEvent={eventButton}
+              />
             )}
-            <div className="native-timeline">
-              {Array.from({ length: 25 }, (_, hour) => (
-                <div className="hour-line" key={hour} style={{ top: hour * 50 }}>
-                  <span>{String(hour % 24).padStart(2, '0')}:00</span>
-                  <i />
-                </div>
-              ))}
-              <div className="timed-events">
-                {timed.map(({ o, start, finish, lane, columns }) =>
-                  eventButton(o, {
-                    position: 'absolute',
-                    top: (start * 50) / 60,
-                    height: Math.max(22, ((finish - start) * 50) / 60),
-                    left: `${(lane * 100) / columns}%`,
-                    width: `calc(${100 / columns}% - 3px)`,
-                  }),
+          </CalendarStream>
+        )}
+      </div>
+      <footer className={`native-bottom ${selecting ? 'selection-footer' : ''}`}>
+        {selecting ? (
+          <div className="glass selection-actions">
+            <div role="status">
+              <strong>
+                {selected.length} jour{selected.length > 1 ? 's' : ''} sélectionné
+                {selected.length > 1 ? 's' : ''}
+              </strong>
+              <small>
+                {selectedDates.length > 1
+                  ? 'Du premier au dernier jour inclus'
+                  : 'Choisis au moins deux jours'}
+              </small>
+            </div>
+            <button
+              className="button primary"
+              disabled={selected.length < 2}
+              onClick={() =>
+                setEditor({ date: selectedDates[0]!, periodEnd: selectedDates.at(-1)! })
+              }
+            >
+              Créer une période
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              className="glass today-control"
+              onClick={() => {
+                setDate(Temporal.Now.plainDateISO(zone))
+                setMonthVisit((value) => value + 1)
+              }}
+            >
+              Aujourd’hui
+            </button>
+            <div className="glass bottom-actions">
+              <button aria-label="Choisir une vue" onClick={() => setSheet('views')}>
+                <Glyph name="calendar" />
+              </button>
+              <button aria-label="Ouvrir le menu" onClick={() => setSheet('calendars')}>
+                <Glyph name="inbox" />
+                {family.snapshot.invitations.filter((i) => !i.used).length > 0 && (
+                  <i className="invitation-dot" />
                 )}
-              </div>
-              {date.equals(today) && (
-                <div className="now-line" style={{ top: ((now.hour * 60 + now.minute) * 50) / 60 }}>
-                  <span>{now.toPlainTime().toString({ smallestUnit: 'minute' })}</span>
-                </div>
-              )}
+              </button>
             </div>
           </>
         )}
-      </div>
-      <footer className="native-bottom">
-        <button
-          className="glass today-control"
-          onClick={() => {
-            setDate(Temporal.Now.plainDateISO(zone))
-            if (scroll.current)
-              scroll.current.scrollTop = view === 'day' ? Math.max(0, (now.hour - 1) * 50) : 0
-          }}
-        >
-          Aujourd’hui
-        </button>
-        <div className="glass bottom-actions">
-          <button aria-label="Choisir une vue" onClick={() => setSheet('views')}>
-            <Glyph name="calendar" />
-          </button>
-          <button aria-label="Ouvrir le menu" onClick={() => setSheet('calendars')}>
-            <Glyph name="inbox" />
-            {family.snapshot.invitations.filter((i) => !i.used).length > 0 && (
-              <i className="invitation-dot" />
-            )}
-          </button>
-        </div>
       </footer>
       {sheet && (
         <CalendarSheet
@@ -452,7 +473,9 @@ function NativeCalendar() {
                   key={value}
                   aria-pressed={view === value}
                   onClick={() => {
+                    setDate(visibleMonth)
                     setView(value)
+                    setMonthVisit((v) => v + 1)
                     setSheet(null)
                   }}
                 >
@@ -460,13 +483,56 @@ function NativeCalendar() {
                   {view === value ? ' ✓' : ''}
                 </button>
               ))}
+              <form
+                className="year-jump"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  const year = Number(new FormData(event.currentTarget).get('year'))
+                  if (!Number.isInteger(year) || year < 0 || year > 275759) return
+                  setDate(Temporal.PlainDate.from({ year, month: 1, day: 1 }))
+                  setView('year')
+                  setMonthVisit((v) => v + 1)
+                  setSheet(null)
+                }}
+              >
+                <label>
+                  Aller à l’année
+                  <input
+                    name="year"
+                    type="number"
+                    min="0"
+                    max="275759"
+                    step="1"
+                    required
+                    defaultValue={visibleMonth.year}
+                  />
+                </label>
+                <button className="button primary">Afficher l’année</button>
+              </form>
               <label>
                 Aller à une date
                 <input
                   type="date"
-                  value={date.toString()}
+                  value={
+                    visibleMonth.year === 0
+                      ? ''
+                      : `${String(visibleMonth.year).padStart(4, '0')}-${String(visibleMonth.month).padStart(2, '0')}-${String(visibleMonth.day).padStart(2, '0')}`
+                  }
+                  min="0001-01-01"
+                  max="275759-12-31"
                   onChange={(e) => {
-                    if (e.target.value) setDate(Temporal.PlainDate.from(e.target.value))
+                    if (e.target.value) {
+                      const [year, month, day] = e.target.value.split('-').map(Number)
+                      if (year! >= 1 && year! <= 275759) {
+                        const selected = Temporal.PlainDate.from({
+                          year: year!,
+                          month: month!,
+                          day: day!,
+                        })
+                        setDate(selected)
+                        setMonthVisit((v) => v + 1)
+                      }
+                    }
                   }}
                 />
               </label>
@@ -475,7 +541,7 @@ function NativeCalendar() {
           {sheet === 'search' && (
             <div className="native-search">
               <label>
-                Rechercher dans les événements de {date.year}
+                Rechercher dans les événements de {visibleMonth.year}
                 <input
                   type="search"
                   value={query}
@@ -558,7 +624,13 @@ function NativeCalendar() {
       )}
       {editor && (
         <CalendarSheet
-          title={editor.record ? 'Événement' : 'Nouvel événement'}
+          title={
+            editor.periodEnd
+              ? 'Créer une période'
+              : editor.record
+                ? 'Événement'
+                : 'Nouvel événement'
+          }
           onClose={() => setEditor(null)}
         >
           <FamilyGate>
@@ -570,6 +642,7 @@ function NativeCalendar() {
                 editor.date
               }
               {...editor}
+              onSaved={endSelection}
               custody={Boolean(editor.record?.payload.custody)}
               onClose={() => setEditor(null)}
             />

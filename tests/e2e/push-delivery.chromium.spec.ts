@@ -5,6 +5,7 @@ test('le gestionnaire de push transmet un message neutre à l’API de notificat
   context,
 }) => {
   await page.goto('/profil')
+  await page.getByText('Installer l’application', { exact: true }).click()
   await expect(
     page.getByText(/L’interface est prête à être consultée hors connexion/),
   ).toBeVisible()

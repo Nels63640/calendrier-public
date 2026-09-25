@@ -1,3 +1,15 @@
+# Interface et défilement continu : 26 septembre 2026
+
+Palette noire et rouge commune à toutes les pages, au manifest et aux icônes. Les préférences de thème historiques ne modifient plus cette identité, conformément à la demande explicite de l’utilisateur. Profil, foyer et formulaire de tâche épurés avec sections repliables. Zoom du mois depuis la grille annuelle, fermeture douce des volets et réduction des animations respectée.
+
+Défilement vertical continu dans les deux sens pour les années, mois et journées. Fenêtre recyclée limitée à 4 années, 8 mois ou 5 jours ; position conservée lors du recyclage, titre et semaine mis à jour avec la période visible. Retour Aujourd’hui et accès direct à une année dans le sélecteur de vue. Navigation de l’an 0 à 275759 (dernière année complète prise en charge par Temporal), pas d’infini littéral. Année 0 affichée explicitement selon la numérotation astronomique. Les années extrêmes concernent la navigation ; la persistance des événements conserve les contraintes existantes de la base.
+
+Création de périodes : bouton Sélect. dans le mois, sélection/désélection conservée au défilement, compteur et action dès deux jours. La période couvre toutes les dates entre le premier et le dernier jour cochés, bornes incluses. Types garde/vacances/vacances scolaires/autre ; garde rattachée à un enfant existant, sans récurrence imposée. Persistance via le formulaire et les droits existants. Aucun import automatique des vacances scolaires.
+
+Recette locale : 69 tests navigateur Chromium/WebKit réussis après correction du positionnement initial des journées ; captures année et transition entre mois contrôlées à 402 × 874. Le parcours de période couvre deux mois, la désélection, les changements journée/horaires, une garde liée à un enfant et la relecture après rechargement. Publication à consigner après exécution. Aucune modification Supabase, aucun changement des limites d’invitations et de notifications décrites ci-dessous.
+
+## Historique
+
 # Nouvelle interface calendrier : 25 septembre 2026
 
 L’utilisateur demande une interface reprenant ses captures iPhone, puis précise que le calendrier doit être la page principale après connexion. Accueil connecté et sorties de connexion/confirmation/récupération ouvrent désormais le calendrier. L’ancien tableau de bord ne sert plus d’accueil.

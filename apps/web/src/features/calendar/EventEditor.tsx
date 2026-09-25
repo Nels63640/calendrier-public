@@ -20,6 +20,8 @@ export function EventEditor({
   custody,
   onClose,
   compact = false,
+  periodEnd,
+  onSaved,
 }: {
   record?: FamilyRecord<'event'>
   occurrence?: Occurrence
@@ -27,6 +29,8 @@ export function EventEditor({
   custody: boolean
   onClose: () => void
   compact?: boolean
+  periodEnd?: string
+  onSaved?: () => void
 }) {
   const family = useFamily(),
     account = useAccount(),
@@ -41,6 +45,13 @@ export function EventEditor({
     : {
         ...blankEvent(date, account.profile?.time_zone ?? 'Europe/Paris'),
         custody,
+        ...(periodEnd
+          ? {
+              allDay: true,
+              start: date + 'T00:00',
+              end: Temporal.PlainDate.from(periodEnd).add({ days: 1 }).toString() + 'T00:00',
+            }
+          : {}),
         ...(custody
           ? {
               start: date + 'T18:00',
@@ -49,6 +60,7 @@ export function EventEditor({
             }
           : {}),
       }
+  const [periodType, setPeriodType] = useState('other')
   const [draft, setDraft] = useState<FamilyEvent>(initial)
   const [scope, setScope] = useState<'series' | 'one' | 'following'>(
     record?.payload.recurrence && occurrence ? 'one' : 'series',
@@ -88,6 +100,7 @@ export function EventEditor({
       })
     else await family.save('event', payload, record, remove)
     await family.refresh()
+    onSaved?.()
     onClose()
   }
   function submit(event: FormEvent) {
@@ -100,8 +113,8 @@ export function EventEditor({
       allDay: value,
       start: draft.start.slice(0, 10) + (value ? 'T00:00' : 'T09:00'),
       end:
-        Temporal.PlainDate.from(draft.start.slice(0, 10))
-          .add({ days: value ? 1 : 0 })
+        Temporal.PlainDate.from(draft.end.slice(0, 10))
+          .add({ days: value ? 1 : -1 })
           .toString() + (value ? 'T00:00' : 'T10:00'),
     })
   }
@@ -142,6 +155,38 @@ export function EventEditor({
               </select>
             </label>
           )}
+          {periodEnd && !record && (
+            <label>
+              Type de période
+              <select
+                value={periodType}
+                onChange={(event) => {
+                  const value = event.target.value
+                  const titles: Record<string, string> = {
+                    other: '',
+                    custody: 'Garde',
+                    holiday: 'Vacances',
+                    school: 'Vacances scolaires',
+                  }
+                  setPeriodType(value)
+                  setDraft({
+                    ...draft,
+                    custody: value === 'custody',
+                    childId: value === 'custody' ? draft.childId : null,
+                    title:
+                      !draft.title || Object.values(titles).includes(draft.title)
+                        ? titles[value]!
+                        : draft.title,
+                  })
+                }}
+              >
+                <option value="other">Autre période</option>
+                <option value="custody">Garde d’un enfant</option>
+                <option value="holiday">Vacances</option>
+                <option value="school">Vacances scolaires</option>
+              </select>
+            </label>
+          )}
           <label>
             Titre
             <input
@@ -152,7 +197,7 @@ export function EventEditor({
               placeholder={custody ? 'La semaine avec Emma' : 'Un rendez-vous, une sortie…'}
             />
           </label>
-          {custody && (
+          {draft.custody && (
             <>
               <label>
                 Enfant
@@ -177,7 +222,10 @@ export function EventEditor({
                   ))}
                 </select>
               </label>
-              {!record && (
+              {children.length === 0 && (
+                <p>Ajoute d’abord l’enfant dans le menu Famille pour lui associer cette garde.</p>
+              )}
+              {!record && !periodEnd && (
                 <label>
                   Modèle de garde
                   <select

@@ -89,6 +89,7 @@ test.describe('comptes avec API Supabase simulée', () => {
     await expect(page.getByRole('button', { name: 'Ouvrir le menu' })).toBeVisible()
     await page.getByRole('button', { name: 'Ouvrir le menu' }).click()
     await page.getByRole('link', { name: /Mon profil/ }).click()
+    await page.getByText('Modifier mon profil', { exact: true }).click()
     await expect(page.getByLabel('Prénom')).toHaveValue('Alice')
     await page.getByLabel('Prénom').fill('Alicia')
     await page.getByLabel('Avatar').selectOption('leaf')
@@ -133,6 +134,7 @@ test.describe('comptes avec API Supabase simulée', () => {
     await expect(page.getByRole('button', { name: 'Ouvrir le menu' })).toBeVisible()
     await page.getByRole('button', { name: 'Ouvrir le menu' }).click()
     await page.getByRole('link', { name: /Mon profil/ }).click()
+    await page.getByText('Modifier mon profil', { exact: true }).click()
     await expect(page.getByLabel('Prénom')).toHaveValue('Alice')
     expect(page.url()).not.toContain(user.email)
   })
@@ -146,6 +148,7 @@ test.describe('comptes avec API Supabase simulée', () => {
     await expect(page.getByRole('button', { name: 'Ouvrir le menu' })).toBeVisible()
     await page.getByRole('button', { name: 'Ouvrir le menu' }).click()
     await page.getByRole('link', { name: /Mon profil/ }).click()
+    await page.getByText('Modifier mon profil', { exact: true }).click()
     await expect(page.getByLabel('Prénom')).toHaveValue('Alice')
     await page.getByLabel('Prénom').fill('Alicia')
     const failSave = async (route: import('@playwright/test').Route) => {
