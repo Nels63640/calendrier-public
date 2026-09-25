@@ -53,3 +53,7 @@ Le défilement vertical recycle un nombre borné de périodes et préserve leur 
 ## 26 septembre 2026 — Sélection de périodes
 
 Deux jours cochés au minimum activent la création. Une période est continue, du premier au dernier jour inclus ; le compteur distingue les jours cochés des jours couverts. Le formulaire préremplit une journée entière avec fin exclusive en stockage, propose garde/vacances/vacances scolaires/autre et conserve les droits de partage existants. La garde sélectionnée utilise les bornes choisies sans appliquer le modèle automatique une semaine sur deux. Aucun import de calendrier scolaire dans cette demande.
+
+## 26 septembre 2026 — Préserver l’inertie du défilement
+
+Les compensations de position pendant le défilement peuvent interrompre l’inertie Safari. Ajouter les périodes suivantes sans scroll programmatique, charger plusieurs périodes en avance et différer le recyclage avec compensation jusqu’au repos (220 ms et aucun contact). Le retour Aujourd’hui invalide également la légende dérivée de la période précédente et centre le marqueur courant dans l’année.

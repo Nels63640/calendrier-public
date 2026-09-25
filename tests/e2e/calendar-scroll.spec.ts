@@ -36,7 +36,7 @@ test('défilement continu des années, mois et jours, an zéro et futur lointain
     })
     await page.waitForTimeout(80)
   }
-  expect(await page.locator('[data-day]').count()).toBeLessThanOrEqual(5)
+  await expect.poll(() => page.locator('[data-day]').count()).toBeLessThanOrEqual(16)
   await page.getByRole('button', { name: 'Aujourd’hui', exact: true }).click()
   await expect(heading).toContainText('25 sept. 2026')
   for (const year of ['0', '10000', '275759']) {
@@ -68,4 +68,57 @@ test('le zoom respecte la réduction des animations', async ({ page }) => {
   await page.getByRole('button', { name: 'septembre 2026', exact: true }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('septembre')
   await expect(page.locator('[data-zooming]')).toHaveCount(0)
+})
+
+test('Aujourd’hui revient au vrai jour et le geste ne déclenche aucun repositionnement', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(new Date('2026-09-25T22:21:00Z'))
+  await page.goto('/calendrier')
+  const heading = page.getByRole('heading', { level: 1 })
+  const scroll = page.locator('.native-scroll')
+  await page.locator('[data-year="2027"]').evaluate((element) => {
+    const viewport = element.closest('.native-scroll')!
+    viewport.scrollTop +=
+      element.getBoundingClientRect().top - viewport.getBoundingClientRect().top + 100
+  })
+  await expect(heading).toHaveText('2027')
+  for (let n = 0; n < 3; n++) {
+    await page.getByRole('button', { name: 'Aujourd’hui', exact: true }).click()
+    await expect(heading).toHaveText('2026')
+    const today = page.locator('[data-year="2026"] .today')
+    await expect(today).toHaveText('26')
+    await expect(today).toBeInViewport()
+    await expect(today).toHaveCSS('background-color', 'rgb(255, 65, 75)')
+  }
+  await page.waitForTimeout(350)
+  const moves = await scroll.evaluate(async (element) => {
+    let calls = 0
+    const originalTo = element.scrollTo.bind(element),
+      originalBy = element.scrollBy.bind(element)
+    element.scrollTo = (options?: ScrollToOptions | number, y?: number) => {
+      calls++
+      if (typeof options === 'number') originalTo(options, y ?? 0)
+      else originalTo(options)
+    }
+    element.scrollBy = (options?: ScrollToOptions | number, y?: number) => {
+      calls++
+      if (typeof options === 'number') originalBy(options, y ?? 0)
+      else originalBy(options)
+    }
+    element.dispatchEvent(new Event('touchstart'))
+    for (let i = 0; i < 30; i++) {
+      element.scrollTop += 150
+      await new Promise((resolve) => setTimeout(resolve, 25))
+    }
+    const count = calls
+    element.dispatchEvent(new Event('touchend'))
+    element.scrollTo = originalTo
+    element.scrollBy = originalBy
+    return count
+  })
+  expect(moves).toBe(0)
+  await page.getByRole('button', { name: 'Aujourd’hui', exact: true }).click()
+  await expect(heading).toHaveText('2026')
+  await expect(page.locator('[data-year="2026"] .today')).toBeInViewport()
 })

@@ -1,3 +1,13 @@
+# Correctif Aujourd’hui et défilement : 26 septembre 2026
+
+Signalement utilisateur : Aujourd’hui revient sur 2027 et le défilement s’interrompt régulièrement sur iPhone. Le bouton rafraîchit maintenant l’horloge et remet à zéro la légende de période avant de recréer la vue. La vue annuelle centre le jour courant, avec un positionnement absolu. L’ancien recalage relatif conservait une dépendance à la position antérieure ; le signalement matériel n’a pas été reproduit sur un iPhone physique.
+
+Le chargement anticipé ajoute quatre périodes en fin sans écrire la position de défilement. Préchargement de cinq périodes précédentes ; compensation et recyclage uniquement après 220 ms sans mouvement et sans contact tactile. Fenêtre au repos limitée à 10 années ou 16 mois/jours, temporairement extensible pendant le geste. Le test instrumenté vérifie l’absence de scrollTo/scrollBy pendant un geste simulé ; la fluidité tactile physique reste à confirmer.
+
+Recette et publication du correctif à consigner après validation.
+
+## Historique
+
 # Interface et défilement continu : 26 septembre 2026
 
 Palette noire et rouge commune à toutes les pages, au manifest et aux icônes. Les préférences de thème historiques ne modifient plus cette identité, conformément à la demande explicite de l’utilisateur. Profil, foyer et formulaire de tâche épurés avec sections repliables. Zoom du mois depuis la grille annuelle, fermeture douce des volets et réduction des animations respectée.

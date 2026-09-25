@@ -1,7 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
+﻿import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { Temporal } from '@js-temporal/polyfill'
 
-/** Défilement continu borné ; conserve la position visible au recyclage des périodes. */
+/** Ajoute les périodes suivantes sans déplacer le scroll ; recycle seulement au repos. */
 export function CalendarStream({
   anchor,
   scroll,
@@ -14,106 +14,155 @@ export function CalendarStream({
   scroll: RefObject<HTMLDivElement | null>
   onVisible: (period: Temporal.PlainDate) => void
   unit: 'months' | 'years' | 'days'
-  initialOffset?: number
   children: (period: Temporal.PlainDate) => ReactNode
+  initialOffset?: number
 }) {
-  const limit = unit === 'years' ? 4 : unit === 'days' ? 5 : 8
+  const limit = unit === 'years' ? 10 : 16
   const step = (n: number) =>
     unit === 'years' ? { years: n } : unit === 'days' ? { days: n } : { months: n }
-  const [range, setRange] = useState(() => ({
-    first:
-      anchor.subtract(step(1)).year < 0
-        ? Temporal.PlainDate.from('0000-01-01')
-        : anchor.subtract(step(1)),
-    count: unit === 'months' ? 5 : 3,
-  }))
+  const [range, setRange] = useState(() => {
+    const previous = anchor.subtract(step(5))
+    return {
+      first: previous.year < 0 ? Temporal.PlainDate.from('0000-01-01') : previous,
+      count: 11,
+    }
+  })
   const container = useRef<HTMLDivElement>(null)
+  const touching = useRef(false)
   const initialized = useRef(false)
   const pending = useRef<{ period: string; offset: number } | null>(null)
-  const changing = useRef(false)
   useLayoutEffect(() => {
     const element = container.current,
       viewport = element?.closest<HTMLDivElement>('.native-scroll')
-    if (!viewport || !element) return
+    if (!element || !viewport) return
     const saved = pending.current
-    const key = saved?.period ?? anchor.toString()
-    const target = element.querySelector<HTMLElement>(`[data-period="${key}"]`)
+    const target = element.querySelector<HTMLElement>(
+      `[data-period="${saved?.period ?? anchor.toString()}"]`,
+    )
     if (target && (saved || !initialized.current)) {
-      viewport.scrollBy({
+      // Un positionnement absolu évite d'additionner une restauration Safari à notre décalage.
+      let offset = saved?.offset ?? -initialOffset
+      if (!saved && unit === 'years') {
+        const today = target.querySelector<HTMLElement>('.today')
+        if (today)
+          offset = -Math.max(
+            0,
+            today.getBoundingClientRect().top -
+              target.getBoundingClientRect().top -
+              viewport.clientHeight / 2,
+          )
+      }
+      viewport.scrollTo({
         top:
+          viewport.scrollTop +
           target.getBoundingClientRect().top -
           viewport.getBoundingClientRect().top -
-          (saved?.offset ?? -initialOffset),
+          offset,
         behavior: 'instant',
       })
     }
     initialized.current = true
     pending.current = null
-    changing.current = false
-  }, [range, anchor, scroll, initialOffset])
+  }, [range, anchor, scroll, initialOffset, unit])
   useEffect(() => {
     const element = container.current,
       viewport = element?.closest<HTMLDivElement>('.native-scroll')
-    if (!viewport || !element) return
-    let frame = 0
-    const update = () => {
-      frame = 0
+    if (!element || !viewport) return
+    let frame = 0,
+      idle = 0,
+      changing = false
+    const currentSection = () => {
       const sections = Array.from(element.querySelectorAll<HTMLElement>('[data-period]'))
       const top = viewport.getBoundingClientRect().top
       const current =
         sections.filter((section) => section.getBoundingClientRect().top <= top + 24).at(-1) ??
         sections[0]
+      return { sections, current, top }
+    }
+    const settle = () => {
+      if (touching.current || changing || viewport.closest('[data-zooming]')) return
+      const { sections, current, top } = currentSection()
       if (!current) return
-      const key = current.dataset.period!
-      onVisible(Temporal.PlainDate.from(key))
-      if (changing.current || viewport.closest('[data-zooming]')) return
-      const nearTop =
-        viewport.scrollTop < 250 && Temporal.PlainDate.compare(range.first, '0000-01-01') > 0
+      const index = sections.indexOf(current)
+      let first = range.first,
+        count = range.count
+      if (index < 3 && Temporal.PlainDate.compare(first, '0000-01-01') > 0) {
+        for (let n = 0; n < 4; n++) {
+          const previous = first.subtract(
+            unit === 'years' ? { years: 1 } : unit === 'days' ? { days: 1 } : { months: 1 },
+          )
+          if (previous.year < 0) break
+          first = previous
+          count++
+        }
+      } else if (count > limit && index > 4) {
+        const remove = index - 4
+        first = first.add(
+          unit === 'years'
+            ? { years: remove }
+            : unit === 'days'
+              ? { days: remove }
+              : { months: remove },
+        )
+        count -= remove
+      }
+      count = Math.min(count, limit)
+      if (first.equals(range.first) && count === range.count) return
+      // L'ajout en fin n'a jamais besoin d'une compensation de position.
+      pending.current = {
+        period: current.dataset.period!,
+        offset: current.getBoundingClientRect().top - top,
+      }
+      changing = true
+      setRange({ first, count })
+    }
+    const update = () => {
+      frame = 0
+      const { current } = currentSection()
+      if (current) onVisible(Temporal.PlainDate.from(current.dataset.period!))
+      if (changing || viewport.closest('[data-zooming]')) return
       const delta =
         unit === 'years'
           ? { years: range.count }
           : unit === 'days'
             ? { days: range.count }
             : { months: range.count }
-      const nearEnd =
-        viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 500 &&
+      if (
+        viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <
+          viewport.clientHeight * 1.5 &&
         canAdd(range.first, delta)
-      if (!nearTop && !nearEnd) return
-      pending.current = { period: key, offset: current.getBoundingClientRect().top - top }
-      changing.current = true
-      setRange((previous) =>
-        nearTop
-          ? {
-              first: previous.first.subtract(
-                unit === 'years' ? { years: 1 } : unit === 'days' ? { days: 1 } : { months: 1 },
-              ),
-              count: Math.min(limit, previous.count + 1),
-            }
-          : {
-              first:
-                previous.count >= limit
-                  ? previous.first.add(
-                      unit === 'years'
-                        ? { years: 1 }
-                        : unit === 'days'
-                          ? { days: 1 }
-                          : { months: 1 },
-                    )
-                  : previous.first,
-              count: Math.min(limit, previous.count + 1),
-            },
-      )
+      ) {
+        changing = true
+        setRange((previous) => ({ ...previous, count: previous.count + 4 }))
+      }
     }
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update)
+      clearTimeout(idle)
+      idle = window.setTimeout(settle, 220)
+    }
+    const onStart = () => {
+      touching.current = true
+      clearTimeout(idle)
+    }
+    const onEnd = () => {
+      touching.current = false
+      onScroll()
     }
     viewport.addEventListener('scroll', onScroll, { passive: true })
+    viewport.addEventListener('touchstart', onStart, { passive: true })
+    viewport.addEventListener('touchend', onEnd, { passive: true })
+    viewport.addEventListener('touchcancel', onEnd, { passive: true })
     onScroll()
     return () => {
       viewport.removeEventListener('scroll', onScroll)
+      viewport.removeEventListener('touchstart', onStart)
+      viewport.removeEventListener('touchend', onEnd)
+      viewport.removeEventListener('touchcancel', onEnd)
       cancelAnimationFrame(frame)
+      clearTimeout(idle)
     }
-  }, [scroll, onVisible, range, unit, limit])
+  }, [range, onVisible, scroll, unit, limit])
   return (
     <div ref={container} className="calendar-stream">
       {Array.from({ length: range.count }, (_, index) => {
@@ -128,7 +177,6 @@ export function CalendarStream({
     </div>
   )
 }
-
 function canAdd(date: Temporal.PlainDate, delta: Temporal.DurationLike) {
   try {
     return date.add(delta).year <= 275759

@@ -427,7 +427,10 @@ function NativeCalendar() {
             <button
               className="glass today-control"
               onClick={() => {
-                setDate(Temporal.Now.plainDateISO(zone))
+                const current = Temporal.Now.zonedDateTimeISO(zone)
+                setNow(current)
+                setCaption(null)
+                setDate(current.toPlainDate())
                 setMonthVisit((value) => value + 1)
               }}
             >
