@@ -118,6 +118,11 @@ final class AlarmStoreTests: XCTestCase {
         let refreshed = await store.synchronize()
         XCTAssertTrue(refreshed)
         XCTAssertEqual(driver.scheduled.count, 1)
+        // The daemon may still report scheduled just as the due alarm starts ringing.
+        driver.alerting = []
+        let atBoundary = await store.synchronize()
+        XCTAssertTrue(atBoundary)
+        XCTAssertEqual(driver.scheduled.count, 1)
     }
 
     func testMalformedRulesAreNotPresentedOrRewritten() async throws {

@@ -123,7 +123,9 @@ final class AlarmStore {
             // Cancel obsolete times before installing replacements. Never remove unknown system alarms.
             for (key, record) in archive.registrations where desired[key] == nil {
                 // Opening the app must not silence an alarm currently ringing.
-                if alerting.contains(record.systemID), archive.rules.contains(where: {
+                if (alerting.contains(record.systemID) ||
+                    (activeIDs.contains(record.systemID) && (record.entry.fireDate ?? .distantFuture) <= Date())),
+                   archive.rules.contains(where: {
                     $0.id == record.entry.ruleID && $0.enabled && $0.hour == record.entry.hour &&
                     $0.minute == record.entry.minute && $0.title == record.entry.title
                 }) { continue }
