@@ -120,6 +120,18 @@ final class AlarmStoreTests: XCTestCase {
         XCTAssertEqual(driver.scheduled.count, 1)
     }
 
+    func testMalformedRulesAreNotPresentedOrRewritten() async throws {
+        let driver = FakeAlarmDriver(), location = file()
+        defer { try? FileManager.default.removeItem(at: location) }
+        var rule = AlarmRule(); rule.weekdays = [9]
+        let data = try JSONEncoder().encode(AlarmArchive(rules: [rule]))
+        try data.write(to: location)
+        let store = AlarmStore(driver: driver, file: location)
+        XCTAssertFalse(store.storageHealthy)
+        XCTAssertTrue(store.rules.isEmpty)
+        XCTAssertEqual(try Data(contentsOf: location), data)
+    }
+
     func testCorruptStorageDoesNotEraseSystemAlarms() async throws {
         let driver = FakeAlarmDriver(), location = file()
         defer { try? FileManager.default.removeItem(at: location) }

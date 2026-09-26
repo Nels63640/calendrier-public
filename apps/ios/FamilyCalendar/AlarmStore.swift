@@ -37,9 +37,10 @@ final class AlarmStore {
             .appending(path: "alarms.json")
         do {
             if FileManager.default.fileExists(atPath: self.file.path) {
-                archive = try JSONDecoder().decode(AlarmArchive.self, from: Data(contentsOf: self.file))
-                guard archive.version == 1, Set(archive.rules.map(\.id)).count == archive.rules.count else { throw AlarmProblem.storage }
-                for rule in archive.rules { try rule.validate(calendar: AlarmPlanner.calendar()) }
+                let decoded = try JSONDecoder().decode(AlarmArchive.self, from: Data(contentsOf: self.file))
+                guard decoded.version == 1, Set(decoded.rules.map(\.id)).count == decoded.rules.count else { throw AlarmProblem.storage }
+                for rule in decoded.rules { try rule.validate(calendar: AlarmPlanner.calendar()) }
+                archive = decoded
             }
         } catch {
             storageHealthy = false
