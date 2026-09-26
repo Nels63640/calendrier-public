@@ -13,12 +13,16 @@ public struct AlarmRule: Codable, Identifiable, Equatable, Sendable {
     public var repeatMode = AlarmRepeat.weekly
     // ISO weekdays: Monday = 1, Sunday = 7.
     public var weekdays: Set<Int> = [1, 2, 3, 4, 5]
-    public var date = Date()
+    public var dateDay: String
     // A civil date in week A, not ISO week-number parity.
     public var anchorDay = "2026-09-28"
     public var phase = 0
 
-    public init() {}
+    public init() {
+        let today = AlarmPlanner.civilString(Date(), calendar: AlarmPlanner.calendar())
+        dateDay = today
+        anchorDay = today
+    }
 
     public var timeLabel: String { String(format: "%02d:%02d", hour, minute) }
 
@@ -27,7 +31,8 @@ public struct AlarmRule: Codable, Identifiable, Equatable, Sendable {
               title.count <= 80, (0...23).contains(hour), (0...59).contains(minute),
               phase == 0 || phase == 1,
               repeatMode == .once || (!weekdays.isEmpty && weekdays.allSatisfy({ (1...7).contains($0) })),
-              AlarmPlanner.civilDate(anchorDay, calendar: calendar) != nil
+              AlarmPlanner.civilDate(anchorDay, calendar: calendar) != nil,
+              AlarmPlanner.civilDate(dateDay, calendar: calendar) != nil
         else { throw AlarmProblem.invalidRule }
     }
 }

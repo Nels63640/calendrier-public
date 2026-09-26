@@ -99,7 +99,7 @@ struct AlarmListView: View {
     }
 
     private func summary(_ rule: AlarmRule) -> String {
-        if rule.repeatMode == .once { return rule.date.formatted(date: .abbreviated, time: .omitted) }
+        if rule.repeatMode == .once { return AlarmPlanner.civilDate(rule.dateDay, calendar: AlarmPlanner.calendar())!.formatted(date: .abbreviated, time: .omitted) }
         let labels = ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."]
         let days = rule.weekdays.sorted().map { labels[$0 - 1] }.joined(separator: " ")
         return days + (rule.repeatMode == .alternating ? " · semaine \(rule.phase == 0 ? "A" : "B")" : " · chaque semaine")

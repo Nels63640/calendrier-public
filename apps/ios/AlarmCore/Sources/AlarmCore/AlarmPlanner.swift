@@ -58,7 +58,7 @@ public enum AlarmPlanner {
         try rule.validate(calendar: calendar)
         guard rule.enabled else { return [] }
         if rule.repeatMode == .once {
-            guard let date = occurrence(on: rule.date, rule: rule, calendar: calendar), date > now else { return [] }
+            guard let date = occurrence(on: civilDate(rule.dateDay, calendar: calendar)!, rule: rule, calendar: calendar), date > now else { return [] }
             return [date]
         }
         let anchor = civilDate(rule.anchorDay, calendar: calendar)!

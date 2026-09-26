@@ -16,6 +16,11 @@ struct AlarmEditor: View {
             rule.minute = calendar.component(.minute, from: $0)
         })
     }
+    private var onceDate: Binding<Date> {
+        Binding(get: {
+            AlarmPlanner.civilDate(rule.dateDay, calendar: calendar) ?? Date()
+        }, set: { rule.dateDay = AlarmPlanner.civilString($0, calendar: calendar) })
+    }
     private var anchor: Binding<Date> {
         Binding(get: {
             AlarmPlanner.civilDate(rule.anchorDay, calendar: calendar) ?? Date()
@@ -39,7 +44,7 @@ struct AlarmEditor: View {
                         Text("Une semaine sur deux").tag(AlarmRepeat.alternating)
                     }
                     if rule.repeatMode == .once {
-                        DatePicker("Date", selection: $rule.date, displayedComponents: .date)
+                        DatePicker("Date", selection: onceDate, displayedComponents: .date)
                     } else {
                         HStack {
                             Button("Tous les jours") { rule.weekdays = Set(1...7) }

@@ -52,11 +52,22 @@ final class AlarmPlannerTests: XCTestCase {
     }
 
     func testPunctualFutureAndPast() throws {
-        var rule = AlarmRule(); rule.repeatMode = .once; rule.date = instant("2026-09-26T12:00:00Z")
+        var rule = AlarmRule(); rule.repeatMode = .once; rule.dateDay = "2026-09-26"
         rule.hour = 16; rule.minute = 30
         XCTAssertEqual(try AlarmPlanner.dates(for: rule, after: instant("2026-09-26T00:00:00Z"), calendar: paris),
                        [instant("2026-09-26T14:30:00Z")])
         XCTAssertTrue(try AlarmPlanner.dates(for: rule, after: instant("2026-09-27T00:00:00Z"), calendar: paris).isEmpty)
+    }
+
+    func testPunctualCivilDateAcrossTimeZones() throws {
+        var rule = AlarmRule(); rule.repeatMode = .once; rule.dateDay = "2026-09-28"
+        let now = instant("2026-09-26T00:00:00Z")
+        for zone in ["Europe/Paris", "America/Los_Angeles", "Pacific/Auckland"] {
+            let calendar = AlarmPlanner.calendar(timeZone: TimeZone(identifier: zone)!)
+            let dates = try AlarmPlanner.dates(for: rule, after: now, calendar: calendar)
+            XCTAssertEqual(AlarmPlanner.civilString(dates[0], calendar: calendar), "2026-09-28")
+            XCTAssertEqual(calendar.component(.hour, from: dates[0]), 7)
+        }
     }
 
     func testInvalidRulesAndInsufficientCapacity() throws {

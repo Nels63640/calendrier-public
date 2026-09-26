@@ -105,7 +105,7 @@ final class AlarmStoreTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: location) }
         var rule = AlarmRule()
         rule.repeatMode = .once
-        rule.date = Date().addingTimeInterval(-86400)
+        rule.dateDay = AlarmPlanner.civilString(Date().addingTimeInterval(-86400), calendar: AlarmPlanner.calendar())
         let entry = try AlarmPlanner.plan([rule], now: Date().addingTimeInterval(-3 * 86400),
                                           calendar: AlarmPlanner.calendar()).entries[0]
         let systemID = UUID()
