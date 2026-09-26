@@ -4,7 +4,7 @@ Les anniversaires existants ouvrent un formulaire dédié depuis la recherche ou
 
 Droits alignés sur les événements : auteur, propriétaire ou administrateur pour un anniversaire lisible ; lecture seule sinon. Suppression annuelle avec confirmation conservée dans le formulaire dédié. Aucune migration ni modification directe de données familiales en production.
 
-Validation locale : lint, types, compilation et format réussis. Premier npm run check : 44 tests unitaires et 96/97 tests navigateur réussis ; le nouveau test mobile ouvrait la recherche avant la restauration du foyer. Attente corrigée ; parcours final incluant modification, rechargement, couleur, 29 février et suppression avec annulation : 3/3 réussis sur Chromium bureau/mobile et WebKit mobile. Publication en cours. Aucun test sur iPhone physique.
+Validation locale : lint, types, compilation et format réussis. Premier npm run check : 44 tests unitaires et 96/97 tests navigateur réussis ; le nouveau test mobile ouvrait la recherche avant la restauration du foyer. Attente corrigée ; parcours final incluant modification, rechargement, couleur, 29 février et suppression avec annulation : 3/3 réussis sur Chromium bureau/mobile et WebKit mobile. Publication réussie : commit 15eeb2d, workflow 36265598732 ; npm run check et format au vert, 97 tests navigateur réussis. Formulaire présent dans le JavaScript public ; page, manifest et Service Worker HTTP 200, clé publique VAPID conforme et aucune erreur JavaScript dans le contrôle Chromium. Aucun test sur iPhone physique.
 
 ## Historique
 
