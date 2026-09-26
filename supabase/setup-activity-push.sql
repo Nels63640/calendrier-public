@@ -1,5 +1,5 @@
 -- À exécuter après la migration 202609260007 et le déploiement de reminders.
--- Le même REMINDER_CRON_SECRET doit être configuré dans Vault et dans la fonction.
+-- La fonction vérifie REMINDER_CRON_SECRET via sa configuration Vault.
 create extension if not exists pg_net with schema extensions;
 create or replace function private.wake_activity_worker() returns trigger
 language plpgsql security definer set search_path='' as $$

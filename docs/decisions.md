@@ -69,3 +69,19 @@ Le retour vers l’année utilise la position réelle de la miniature du mois co
 ## 26 septembre 2026 — Appui long et alertes partagées
 
 L’appui long reste compatible avec le défilement natif : aucune capture empêchant le déplacement, annulation au mouvement, préremplissage au quart d’heure. Les alertes sont déclenchées côté base, jamais depuis le téléphone de l’auteur. Une file transactionnelle privée exclut l’auteur et respecte la visibilité, quel que soit le rôle du destinataire. Le réveil HTTP et le cron partagent un secret conservé dans Vault et la fonction. Activation réelle séparée des tests locaux, sans exposer de secret administrateur au frontend.
+
+## 26 septembre 2026 : configuration push dans Vault
+
+La reprise confirme l’accès MCP au projet existant. La CLI n’a pas de session administrative ; remplacer la lecture des variables VAPID/cron de la fonction par une RPC de configuration Vault réservée à service_role et conditionnée au secret de déclenchement. Conserver les clés privées locales préparées. Le contrôle automatique a refusé leur transfert : attendre une autorisation explicite pour .local/production-push.json vers Vault du projet xyfjpeojctmncpfymiyr, sans contournement ni régénération des clés. Migrations et fonction déployées, activation des envois encore bloquée.
+
+## 26 septembre 2026 : autorisation explicite du transfert et activation
+
+L’utilisateur répond « oui » au transfert de .local/production-push.json vers Vault du projet xyfjpeojctmncpfymiyr. Cette autorisation lève le blocage précédent. Transfert effectué en conservant les clés existantes ; moteur, cron et déclencheur activés. Seule VAPID_PUBLIC_KEY est publiée dans la variable GitHub VITE_VAPID_PUBLIC_KEY. Aucune notification ne peut être reçue avant l’inscription volontaire d’un appareil.
+
+## 26 septembre 2026 : publication Pages bloquée par le contrôle automatique
+
+L’activation serveur et le transfert explicitement autorisé sont terminés. Le push normal vers main a été refusé deux fois par le contrôle automatique, malgré les autorisations historiques de publication dans cette mémoire. Ne pas contourner via workflow_dispatch ou une autre route ; attendre un accord explicite pour pousser les changements vers main du dépôt Nels63640/calendrier-public et publier GitHub Pages. La variable publique VAPID est déjà configurée mais le site n’a pas encore été reconstruit avec elle.
+
+## 26 septembre 2026 : publication explicitement autorisée
+
+L’utilisateur répond « oui » à la demande explicite de push vers main de Nels63640/calendrier-public et de déploiement GitHub Pages associé. Cette autorisation lève le blocage de publication précédent. Publier les changements préparés et vérifier le résultat du workflow ainsi que le raccordement public.

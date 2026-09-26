@@ -11,7 +11,6 @@ const env = (key: string) => {
 const client = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), {
   auth: { persistSession: false, autoRefreshToken: false },
 })
-webpush.setVapidDetails(env('VAPID_SUBJECT'), env('VAPID_PUBLIC_KEY'), env('VAPID_PRIVATE_KEY'))
 async function rpc<T>(name: string, args: Record<string, unknown> = {}): Promise<T> {
   const { data, error } = await client.rpc(name, args)
   if (error) throw new Error('Échec de traitement serveur')
@@ -19,12 +18,19 @@ async function rpc<T>(name: string, args: Record<string, unknown> = {}): Promise
 }
 
 Deno.serve(async (request) => {
-  if (
-    request.method !== 'POST' ||
-    request.headers.get('authorization') !== `Bearer ${env('REMINDER_CRON_SECRET')}`
-  )
+  const authorization = request.headers.get('authorization') ?? ''
+  if (request.method !== 'POST' || !/^Bearer [A-Za-z0-9_-]{32,}$/.test(authorization))
     return new Response('Accès refusé', { status: 401 })
   try {
+    const configuration = await rpc<Record<string, string> | null>('worker_push_config', {
+      p_token: authorization.slice(7),
+    })
+    if (!configuration) return new Response('Accès refusé', { status: 401 })
+    webpush.setVapidDetails(
+      configuration.VAPID_SUBJECT,
+      configuration.VAPID_PUBLIC_KEY,
+      configuration.VAPID_PRIVATE_KEY,
+    )
     const send = (
       subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
       payload: string,

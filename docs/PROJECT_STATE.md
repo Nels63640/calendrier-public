@@ -1,3 +1,25 @@
+# Notifications activées côté serveur : 26 septembre 2026
+
+L’utilisateur a explicitement autorisé le transfert de .local/production-push.json vers Vault du projet xyfjpeojctmncpfymiyr. Les quatre valeurs ont été transférées sans affichage et sans régénération des clés. Migrations 007 et 008 appliquées, fonction reminders version 1 ACTIVE, cron family-reminders chaque minute et déclencheur wake_activity_worker installés. Appel authentifié réel : HTTP 200, processed=0 et activities=0 ; appels non autorisés : HTTP 401. Permissions SQL vérifiées : configuration refusée à anon/authenticated, réservée à service_role.
+
+Cron réel vérifié : réponses HTTP 200 sans délai dépassé. Clé publique VAPID configurée et relue sur GitHub. L’utilisateur a explicitement autorisé le push vers main et le déploiement GitHub Pages associé. Publication autorisée, vérification du déploiement en cours. Aucun appareil abonné lors de l’activation ; aucune réception réelle sur téléphone prétendue. Parcours utilisateur : Profil > Notifications > Activer sur cet appareil. Sur iPhone, ouvrir d’abord l’application installée depuis l’écran d’accueil.
+
+Validation du code : npm run check réussi, 36 tests unitaires et 78 tests navigateur Chromium/WebKit ; format:check réussi. Voir [PUSH_ACTIVATION.md](PUSH_ACTIVATION.md). Aucun changement du serveur RedM voisin.
+
+## Historique
+
+# Activation serveur des notifications : 26 septembre 2026
+
+Reprise via MCP supabase-calendar réussie. Sur le projet xyfjpeojctmncpfymiyr, migrations 007 et 008 appliquées et fonction reminders version 1 déployée (ACTIVE). Configuration adaptée à Vault, puisque la CLI n’est pas authentifiée : RPC réservée au rôle serveur, avec contrôle du secret de déclenchement. HTTP 401 vérifié sans secret et avec un faux secret ; permissions SQL réelles vérifiées (anon/authenticated refusés, service_role autorisé).
+
+**Activation bloquée par le contrôle automatique d’approbation :** lecture de .local/production-push.json pour transfert vers Vault refusée, faute d’autorisation explicite portant sur ce fichier et cette destination. L’utilisateur a autorisé l’activation générale ; ne pas lui demander une clé publique ou une installation de plugin. La prochaine autorisation doit porter précisément sur ce transfert. Aucun secret transféré, aucun cron ni déclencheur HTTP installé, aucune variable VAPID publique activée, aucune réception réelle vérifiée. Aucun appareil abonné lors du contrôle.
+
+La fonction déployée refuse les appels tant que la configuration manque. Voir [PUSH_ACTIVATION.md](PUSH_ACTIVATION.md) pour la reprise exacte. Le serveur RedM voisin n’a pas été modifié.
+
+Validation finale : npm run check réussi (36 tests unitaires et 78 tests navigateur Chromium/WebKit), format:check réussi. Premier chevauchement de validations corrigé par une exécution unique ; la validation finale est verte. Aucun test iPhone physique.
+
+## Historique
+
 # Appui long et notifications d’activité : 26 septembre 2026
 
 Un appui de 500 ms sur la grille horaire ouvre un événement à cet emplacement, arrondi au quart d’heure, pour une durée initiale d’une heure. Un mouvement de plus de 10 px ou un défilement annule le geste. L’encadré enregistré se rouvre au toucher ; sa hauteur suit la durée modifiée. Aucun redimensionnement par glisser n’est implémenté.

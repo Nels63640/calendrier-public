@@ -4,7 +4,7 @@ React/TypeScript/Vite pour la PWA, packages/domain pour les validations et calcu
 
 Les tables family_records et event_exceptions utilisent des charges JSON validées par le serveur, des versions et des mutations idempotentes. Les fonctions SQL arbitrent rôles, visibilité, invitations et modifications de récurrence. Les personnes concernées ne donnent aucun droit de lecture.
 
-Le serveur de rappels utilise une file durable, un curseur de reprise, des tentatives bornées et une revérification des droits avant prise en charge. Sa mise en service est encore requise.
+Le serveur de rappels utilise une file durable, un curseur de reprise, des tentatives bornées et une revérification des droits avant prise en charge. La fonction est déployée, les secrets sont dans Vault et le cron ainsi que le déclencheur transactionnel sont actifs. La configuration Vault est accessible uniquement au moteur serveur, après contrôle du secret de déclenchement.
 
 ## Conception initiale conservée pour historique
 

@@ -1,5 +1,5 @@
 -- Après déploiement de la fonction reminders et configuration de ses secrets.
--- Dans Vault, créer REMINDER_CRON_SECRET avec la même valeur privée que la fonction.
+-- La fonction lit sa configuration dans Vault via worker_push_config.
 -- Ne jamais copier la valeur du secret dans un fichier versionné.
 create extension if not exists pg_cron;
 create extension if not exists pg_net with schema extensions;
