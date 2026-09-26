@@ -59,9 +59,9 @@ final class AlarmStore {
         do {
             let calendar = AlarmPlanner.calendar()
             try rule.validate(calendar: calendar)
-            if rule.enabled && rule.repeatMode == .once &&
-                (try AlarmPlanner.dates(for: rule, after: Date(), calendar: calendar)).isEmpty {
-                throw AlarmProblem.pastDate
+            if rule.enabled && rule.repeatMode == .once {
+                let dates = try AlarmPlanner.dates(for: rule, after: Date(), calendar: calendar)
+                if dates.isEmpty { throw AlarmProblem.pastDate }
             }
             var rules = archive.rules.filter { $0.id != rule.id }
             rules.append(rule)

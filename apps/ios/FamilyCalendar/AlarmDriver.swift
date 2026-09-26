@@ -22,7 +22,11 @@ final class SystemAlarmDriver: AlarmDriver {
     var authorized: Bool { manager.authorizationState == .authorized }
 
     func requestAuthorization() async throws -> Bool {
-        try await manager.requestAuthorization() == .authorized
+        try await Self.authorizeSystem()
+    }
+
+    private nonisolated static func authorizeSystem() async throws -> Bool {
+        try await AlarmManager.shared.requestAuthorization() == .authorized
     }
 
     func identifiers() throws -> Set<UUID> { Set(try manager.alarms.map(\.id)) }
@@ -34,6 +38,10 @@ final class SystemAlarmDriver: AlarmDriver {
     func cancel(id: UUID) throws { try manager.cancel(id: id) }
 
     func schedule(id: UUID, entry: AlarmEntry) async throws {
+        try await Self.scheduleSystem(id: id, entry: entry)
+    }
+
+    private nonisolated static func scheduleSystem(id: UUID, entry: AlarmEntry) async throws {
         let schedule: Alarm.Schedule
         if let date = entry.fireDate {
             schedule = .fixed(date)
@@ -57,6 +65,6 @@ final class SystemAlarmDriver: AlarmDriver {
             schedule: schedule, attributes: attributes,
             stopIntent: nil, secondaryIntent: nil, sound: .default
         )
-        _ = try await manager.schedule(id: id, configuration: configuration)
+        _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration)
     }
 }

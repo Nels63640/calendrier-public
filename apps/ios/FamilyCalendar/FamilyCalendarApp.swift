@@ -16,7 +16,7 @@ struct FamilyCalendarApp: App {
             .tint(.red)
             .preferredColorScheme(.dark)
             .environment(\.locale, Locale(identifier: "fr_FR"))
-            .task { await store.synchronize() }
+            .task { _ = await store.synchronize() }
             .onChange(of: phase) { _, value in
                 if value == .active { Task { await store.synchronize() } }
             }
