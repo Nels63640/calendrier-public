@@ -2,9 +2,9 @@
 
 Demandes intégrées : notifications avec date, heure et titre ; rappels en minutes/heures/jours/semaines/mois ; jours fériés de France métropolitaine et vacances des zones A/B/C sélectionnables ; anniversaires annuels. Sources officielles embarquées, préférences de zones propres à cet appareil. Détails et limites : [CALENDAR_EXTRAS.md](CALENDAR_EXTRAS.md).
 
-Production : migrations 009, 010 et 011 appliquées et fonction reminders version 2 ACTIVE. Les cinq dernières réponses du cron contrôlées sont HTTP 200, sans dépassement de délai. Le frontend public conserve encore son ancien Service Worker et ses anciens formulaires.
+Production : migrations 009, 010 et 011 appliquées et fonction reminders version 2 ACTIVE. Les cinq dernières réponses du cron contrôlées sont HTTP 200, sans dépassement de délai. Le frontend public et son Service Worker enrichi sont publiés ; les appareils déjà installés doivent accepter la mise à jour proposée.
 
-Autorisation explicite reçue : « autorisé », pour les migrations 010 et 011 remplaçant la validation partagée. Les deux migrations sont appliquées avec succès, sans suppression de données. Publication GitHub Pages en cours.
+Autorisation explicite reçue : « autorisé », pour les migrations 010 et 011 remplaçant la validation partagée. Les deux migrations sont appliquées avec succès, sans suppression de données. Publication GitHub Pages réussie : commit 28c8d4a, workflow 36225762340 (tests, format, construction et déploiement réussis). Contrôle public Chromium : zones A/B/C visibles, préférence conservée après rechargement, aucune erreur JavaScript ; clé publique VAPID conforme et page/manifest/Service Worker HTTP 200.
 
 Validation : 41 tests unitaires réussis ; les six scénarios ciblés des nouvelles fonctions passent sous Chromium bureau/mobile et WebKit mobile. Contrôle visuel du sélecteur à 320 pixels effectué. Format conforme. Validation complète finale npm run check réussie : lint, compilation, 41 tests unitaires et 85 tests navigateur. Journal local : .local/extras-complete.log. Aucune réception sur téléphone physique prétendue.
 
