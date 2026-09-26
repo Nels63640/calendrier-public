@@ -103,3 +103,7 @@ La PWA ne peut pas fournir une alarme système : ajouter une cible native AlarmK
 ## 26 septembre 2026 : abandon des réveils iPhone
 
 L’utilisateur abandonne les réveils après clarification des contraintes d’installation et de distribution, puis demande le nettoyage. Retirer le projet natif et son workflow ; conserver les notifications et rappels web existants. Aucune installation Xcode, distribution TestFlight ou solution Raccourcis à poursuivre. L’historique Git conserve le travail abandonné.
+
+## 26 septembre 2026 : balayage journalier
+
+L’utilisateur demande le défilement gauche/droite dans la vue horaire. Ajouter un geste horizontal sur les heures et le bandeau des jours, garder le défilement vertical existant et la même heure affichée au changement. Ne pas confondre balayage, appui long de création et toucher d’un événement.

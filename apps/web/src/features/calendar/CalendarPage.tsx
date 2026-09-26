@@ -1,7 +1,16 @@
+import { useDaySwipe } from './useDaySwipe'
 import { BirthdayEditor } from './BirthdayEditor'
 import { CalendarLayersPanel } from './CalendarLayersPanel'
 import { publicCalendarRecords, readLayers, type CalendarLayers } from './public-calendars'
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react'
 import { Temporal } from '@js-temporal/polyfill'
 import { Link } from 'react-router'
 import { useAccount } from '../auth/auth-context'
@@ -112,6 +121,55 @@ function NativeCalendar() {
   } | null>(null)
   const scroll = useRef<HTMLDivElement>(null)
   const { prepareMonthZoom, prepareYearZoom } = useMonthZoom(view, date.toString(), scroll)
+  const dayTransition = useRef<{ target: string; offset: number; direction: number } | null>(null)
+  const daySwipe = useDaySwipe(
+    view === 'day' && !sheet && !editor && !publicEvent && !birthday,
+    (direction) => {
+      const next = visibleMonth.add({ days: direction })
+      if (next.year < 0 || next.year > 275759) return
+      const viewport = scroll.current
+      const timeline = viewport?.querySelector<HTMLElement>(
+        '[data-day="' + visibleMonth.toString() + '"] .native-timeline',
+      )
+      if (viewport && timeline) {
+        dayTransition.current = {
+          target: next.toString(),
+          offset: viewport.getBoundingClientRect().top - timeline.getBoundingClientRect().top,
+          direction,
+        }
+      }
+      setCaption(null)
+      setDate(next)
+      setMonthVisit((value) => value + 1)
+    },
+  )
+  useLayoutEffect(() => {
+    const transition = dayTransition.current
+    dayTransition.current = null
+    const viewport = scroll.current
+    if (!transition || view !== 'day' || transition.target !== dateKey || !viewport) return
+    const timeline = viewport.querySelector<HTMLElement>(
+      '[data-day="' + dateKey + '"] .native-timeline',
+    )
+    if (!timeline) return
+    // Conserver l'heure visible, même si les événements de journée changent de hauteur.
+    viewport.scrollBy({
+      top:
+        timeline.getBoundingClientRect().top -
+        viewport.getBoundingClientRect().top +
+        transition.offset,
+      behavior: 'instant',
+    })
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      viewport.querySelector('.calendar-stream')?.animate(
+        [
+          { transform: 'translateX(' + transition.direction * 40 + 'px)', opacity: 0.65 },
+          { transform: 'translateX(0)', opacity: 1 },
+        ],
+        { duration: 180, easing: 'ease-out' },
+      )
+    }
+  }, [view, dateKey, monthVisit])
   const touch = useRef<{ x: number; y: number } | null>(null)
   useEffect(() => {
     const id = setInterval(() => setNow(Temporal.Now.zonedDateTimeISO(zone)), 30000)
@@ -231,7 +289,7 @@ function NativeCalendar() {
   }
   const weekStart = visibleMonth.subtract({ days: visibleMonth.dayOfWeek - 1 })
   return (
-    <div className="native-calendar">
+    <div className="native-calendar" {...daySwipe}>
       <header className="native-topbar">
         {view !== 'year' ? (
           <button
@@ -356,10 +414,11 @@ function NativeCalendar() {
         className={`native-scroll ${view}-scroll`}
         ref={scroll}
         onTouchStart={(e) => {
+          if (view === 'day' || e.touches?.length !== 1) return
           touch.current = { x: e.touches[0]!.clientX, y: e.touches[0]!.clientY }
         }}
         onTouchEnd={(e) => {
-          if (!touch.current) return
+          if (view === 'day' || !touch.current || !e.changedTouches?.length) return
           const dx = e.changedTouches[0]!.clientX - touch.current.x,
             dy = e.changedTouches[0]!.clientY - touch.current.y
           if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 2) move(dx < 0 ? 1 : -1)

@@ -1,3 +1,11 @@
+# Balayage horizontal des journées : 26 septembre 2026
+
+Dans la vue journée, glisser vers la gauche ouvre le lendemain et vers la droite la veille, depuis les heures ou le bandeau des jours. Le changement conserve l’heure visible, traverse les semaines/mois et applique une transition courte respectant la réduction des animations. Le geste vertical reste natif ; un déplacement annule l’appui long et le clic issu du balayage est neutralisé.
+
+Validation locale : lint, compilation, format et 42 tests unitaires réussis. Suite complète : 87/88 tests navigateur au premier passage (échec du défilement WebKit déjà observé avant modification). Relance ciblée sans modification du code : 15/15 réussis, dont balayage sur Chromium bureau/mobile et WebKit mobile ; entrées tactiles Chromium, annulation du geste et défilement vertical vérifiés. Publication en cours. Aucune recette sur iPhone physique prétendue.
+
+## Historique
+
 # Réveils iPhone abandonnés : 26 septembre 2026
 
 À la demande de l’utilisateur, la partie native iPhone est abandonnée et retirée : projet apps/ios, tests Swift, guide Mac, workflow de compilation iOS et exclusions associées. Aucun réveil installé sur téléphone, aucune distribution App Store/TestFlight et aucune donnée Supabase spécifique aux alarmes à supprimer.

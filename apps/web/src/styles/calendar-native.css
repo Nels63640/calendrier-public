@@ -794,3 +794,12 @@ html:has(.calendar-shell) {
   color: #eee;
   border-radius: 0;
 }
+
+.day-scroll,
+.native-week-strip {
+  touch-action: pan-y pinch-zoom;
+}
+.native-week-strip {
+  -webkit-user-select: none;
+  user-select: none;
+}
