@@ -74,8 +74,9 @@ export function NotificationSettings() {
       </p>
       <p>Recevez les ajouts et modifications des autres membres du foyer, ainsi que vos rappels.</p>
       <p className="muted">
-        Les alertes restent discrètes sur l’écran verrouillé. La réception dépend de l’appareil et
-        du réseau ; elle n’est pas garantie à la seconde.
+        Les alertes affichent le titre, la date et l’heure de l’événement, y compris sur l’écran
+        verrouillé. La réception dépend de l’appareil et du réseau ; elle n’est pas garantie à la
+        seconde.
       </p>
       {!supported ? (
         <p>Les notifications ne sont pas disponibles dans ce navigateur.</p>

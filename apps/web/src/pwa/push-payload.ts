@@ -1,5 +1,7 @@
 export function notificationContent(input: unknown) {
   const value = input && typeof input === 'object' ? (input as Record<string, unknown>) : {}
+  const body =
+    typeof value.body === 'string' ? value.body.replace(/\s+/g, ' ').trim().slice(0, 650) : ''
   if (value.kind === 'activity') {
     const routes: Record<string, string> = {
       event: '/calendrier',
@@ -35,20 +37,25 @@ export function notificationContent(input: unknown) {
           : 'Modification'
     return {
       title: 'Calendrier familial',
-      body: action + ' · ' + subjects[entity] + '.',
+      body: body || action + ' · ' + subjects[entity] + '.',
       tag: typeof value.id === 'string' ? 'activity-' + value.id.slice(0, 80) : 'family-activity',
       url: routes[entity]!,
     }
   }
-  // Aucun titre, lieu ou nom de personne sur l’écran verrouillé.
+  // Les détails affichés sont préparés après contrôle des droits côté serveur.
   return {
     title: 'Calendrier familial',
     body:
       value.kind === 'reminder'
-        ? 'Un rappel vous attend dans votre espace.'
+        ? body || 'Un rappel vous attend dans votre espace.'
         : 'Votre notification de test est arrivée.',
     tag: typeof value.id === 'string' ? value.id.slice(0, 80) : 'family-calendar-test',
-    url: value.kind === 'reminder' ? '/calendrier' : '/profil/notifications',
+    url:
+      value.kind === 'reminder'
+        ? value.entity === 'task'
+          ? '/taches'
+          : '/calendrier'
+        : '/profil/notifications',
   }
 }
 

@@ -1,3 +1,4 @@
+import { reminderDue, reminderKey } from './reminder-options.ts'
 import { Temporal } from '@js-temporal/polyfill'
 import type { FamilyEvent, FamilyRecord, EventException, Occurrence } from './family.ts'
 
@@ -37,7 +38,11 @@ export function originalAt(event: FamilyEvent, index: number): string | null {
           : { years: n },
   )
   // RFC 5545 : sauter une date absente, sans la rabattre au dernier jour.
-  if ((rule.frequency === 'monthly' || rule.frequency === 'yearly') && result.day !== anchor.day)
+  if (
+    (rule.frequency === 'monthly' || rule.frequency === 'yearly') &&
+    result.day !== anchor.day &&
+    event.eventType !== 'birthday'
+  )
     return null
   const value = localString(result)
   return rule.until && value > rule.until ? null : value
@@ -156,8 +161,11 @@ export function calendarWindow(
 }
 
 export function reminderTimes(occurrence: Occurrence) {
-  return [...new Set(occurrence.event.reminders)].map((minutes) => ({
-    minutes,
-    due: Temporal.Instant.from(occurrence.startInstant).subtract({ minutes }).toString(),
-  }))
+  const dueTimes = new Set<string>()
+  return occurrence.event.reminders.flatMap((reminder) => {
+    const due = reminderDue(reminder, occurrence.start, occurrence.event.timeZone)
+    if (dueTimes.has(due)) return []
+    dueTimes.add(due)
+    return [{ key: reminderKey(reminder), due }]
+  })
 }

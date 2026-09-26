@@ -1,3 +1,4 @@
+import { ReminderEditor } from '../calendar/ReminderEditor'
 import { useState, type FormEvent } from 'react'
 import { PageHeading } from '../../components/PageHeading'
 import { useAccount } from '../auth/auth-context'
@@ -11,6 +12,7 @@ export function ListsPage({ kind }: { kind: 'shopping' | 'task' }) {
     account = useAccount(),
     action = useAccountAction()
   const [editing, setEditing] = useState<FamilyRecord | undefined>()
+  const [formVersion, setFormVersion] = useState(0)
   const [showDone, setShowDone] = useState(false)
   const tasks = kind === 'task'
   const records = family.snapshot.records.filter((r) => r.kind === kind)
@@ -29,7 +31,7 @@ export function ListsPage({ kind }: { kind: 'shopping' | 'task' }) {
             timeZone: data.get('timeZone'),
             priority: data.get('priority'),
             status: editing ? (editing.payload as Task).status : 'todo',
-            reminders: data.get('reminder') === '' ? [] : [Number(data.get('reminder'))],
+            reminders: JSON.parse(String(data.get('reminders') || '[]')),
           }
         : {
             title: data.get('title'),
@@ -39,6 +41,7 @@ export function ListsPage({ kind }: { kind: 'shopping' | 'task' }) {
           }
       await family.save(kind, payload, editing)
       form.reset()
+      setFormVersion((value) => value + 1)
       setEditing(undefined)
       return family.offline ? 'Modification conservée en attente de connexion.' : 'Enregistré.'
     })
@@ -56,7 +59,11 @@ export function ListsPage({ kind }: { kind: 'shopping' | 'task' }) {
       <FamilyGate>
         <section className="settings-card">
           <h2>{editing ? 'Modifier' : tasks ? 'Ajouter une tâche' : 'Ajouter un produit'}</h2>
-          <form key={editing?.id ?? 'new'} className="account-form" onSubmit={submit}>
+          <form
+            key={(editing?.id ?? 'new') + formVersion}
+            className="account-form"
+            onSubmit={submit}
+          >
             <fieldset disabled={action.busy}>
               <label>
                 {tasks ? 'Titre de la tâche' : 'Produit'}
@@ -113,15 +120,10 @@ export function ListsPage({ kind }: { kind: 'shopping' | 'task' }) {
                       }
                     />
                   </label>
-                  <label>
-                    Rappel
-                    <select name="reminder" defaultValue={(value as Task)?.reminders[0] ?? ''}>
-                      <option value="">Aucun</option>
-                      <option value="0">À l’échéance</option>
-                      <option value="60">Une heure avant</option>
-                      <option value="1440">24 heures avant</option>
-                    </select>
-                  </label>
+                  <ReminderEditor
+                    name="reminders"
+                    defaultValue={(value as Task)?.reminders ?? []}
+                  />
                 </details>
               ) : (
                 <div className="field-pair">

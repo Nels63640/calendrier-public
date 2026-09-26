@@ -1,3 +1,4 @@
+import { remindersSchema } from './reminder-options.ts'
 import { Temporal } from '@js-temporal/polyfill'
 import { z } from 'zod'
 
@@ -50,7 +51,8 @@ export const eventSchema = z
     categoryId: uuid.nullable(),
     custody: z.boolean(),
     recurrence: recurrenceSchema.nullable(),
-    reminders: z.array(z.number().int().min(0).max(43200)).max(5),
+    eventType: z.enum(['event', 'birthday']).optional(),
+    reminders: remindersSchema,
   })
   .superRefine((value, ctx) => {
     if (value.end <= value.start)
@@ -103,7 +105,7 @@ export const taskSchema = z.object({
   timeZone: zone,
   priority: z.enum(['low', 'normal', 'high']),
   status: z.enum(['todo', 'doing', 'done']),
-  reminders: z.array(z.number().int().min(0).max(43200)).max(5),
+  reminders: remindersSchema,
 })
 export type FamilyEvent = z.infer<typeof eventSchema>
 export type Shopping = z.infer<typeof shoppingSchema>

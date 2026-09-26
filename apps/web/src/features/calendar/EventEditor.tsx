@@ -1,3 +1,4 @@
+import { ReminderEditor } from './ReminderEditor'
 import { useState, type FormEvent } from 'react'
 import { Temporal } from '@js-temporal/polyfill'
 import type {
@@ -75,7 +76,6 @@ export function EventEditor({
   const [scope, setScope] = useState<'series' | 'one' | 'following'>(
     record?.payload.recurrence && occurrence ? 'one' : 'series',
   )
-  const [reminderInput, setReminderInput] = useState(initial.reminders.join(', '))
   const [deleting, setDeleting] = useState(false)
   const children = family.snapshot.records.filter(
     (r) => r.kind === 'child',
@@ -88,14 +88,7 @@ export function EventEditor({
     setDraft({ ...draft, [key]: value })
   }
   async function commit(remove = false) {
-    const payload = remove
-      ? (record?.payload ?? draft)
-      : eventSchema.parse({
-          ...draft,
-          reminders: reminderInput.trim()
-            ? reminderInput.split(',').map((value) => Number(value.trim()))
-            : [],
-        })
+    const payload = remove ? (record?.payload ?? draft) : eventSchema.parse(draft)
     if (record && occurrence && scope !== 'series')
       await rpc('change_occurrence', {
         p_household: family.active,
@@ -154,9 +147,6 @@ export function EventEditor({
                   const value = e.target.value as typeof scope
                   setScope(value)
                   setDraft(value === 'series' ? record.payload : initial)
-                  setReminderInput(
-                    (value === 'series' ? record.payload : initial).reminders.join(', '),
-                  )
                 }}
               >
                 <option value="one">Uniquement cette occurrence</option>
@@ -311,6 +301,12 @@ export function EventEditor({
                   : 'Partagé avec les personnes choisies.'}
             </p>
           )}
+          <ReminderEditor
+            value={draft.reminders}
+            onChange={(value) => patch('reminders', value)}
+            start={draft.start}
+            timeZone={draft.timeZone}
+          />
           <details className="event-options" open={!compact}>
             <summary>Répétition, partage et autres options</summary>
             <label>
@@ -493,19 +489,6 @@ export function EventEditor({
                 </fieldset>
               </>
             )}
-            <label>
-              Rappels, en minutes avant le début
-              <input
-                value={reminderInput}
-                onChange={(e) => setReminderInput(e.target.value)}
-                placeholder="0, 15, 60, 1440"
-                aria-describedby="reminder-help"
-              />
-            </label>
-            <p id="reminder-help" className="muted">
-              Jusqu’à 5 rappels. 1440 minutes = 24 heures. Activez les notifications dans votre
-              profil.
-            </p>
           </details>
           <button className="button primary">
             {action.busy ? 'Enregistrement…' : 'Enregistrer l’événement'}

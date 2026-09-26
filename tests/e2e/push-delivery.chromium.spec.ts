@@ -67,3 +67,54 @@ test('le refus de permission reste explicite et ne crée aucun abonnement', asyn
     await page.evaluate(() => JSON.stringify({ ...localStorage, ...sessionStorage })),
   ).not.toContain('code-de-test')
 })
+
+test('rappel et modification affichent la date, l’heure et le nom dans le Service Worker', async ({
+  page,
+  context,
+}) => {
+  await page.goto('/profil')
+  await page.getByText('Installer l’application', { exact: true }).click()
+  await expect(
+    page.getByText(/L’interface est prête à être consultée hors connexion/),
+  ).toBeVisible()
+  const calls = await context.serviceWorkers()[0].evaluate(async () => {
+    const scope = globalThis as unknown as { registration: ServiceWorkerRegistration }
+    const results: { title: string; options?: NotificationOptions }[] = []
+    const original = scope.registration.showNotification
+    scope.registration.showNotification = async (title, options) => {
+      results.push({ title, options })
+    }
+    try {
+      for (const [kind, prefix] of [
+        ['reminder', 'Rappel'],
+        ['activity', 'Modification'],
+      ]) {
+        const pending: Promise<unknown>[] = []
+        const event = new Event('push')
+        Object.defineProperty(event, 'data', {
+          value: {
+            json: () => ({
+              kind,
+              entity: 'event',
+              action: 'updated',
+              id: kind,
+              body: prefix + ' : 27/09/2026 à 14:30 · Dentiste',
+            }),
+          },
+        })
+        Object.defineProperty(event, 'waitUntil', {
+          value: (p: Promise<unknown>) => pending.push(p),
+        })
+        self.dispatchEvent(event)
+        await Promise.all(pending)
+      }
+      return results
+    } finally {
+      scope.registration.showNotification = original
+    }
+  })
+  expect(calls).toHaveLength(2)
+  expect(calls[0].options?.body).toBe('Rappel : 27/09/2026 à 14:30 · Dentiste')
+  expect(calls[1].options?.body).toBe('Modification : 27/09/2026 à 14:30 · Dentiste')
+  expect(calls[0].options?.data).toEqual({ url: '/calendrier' })
+})

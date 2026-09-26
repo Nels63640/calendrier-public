@@ -1,3 +1,4 @@
+import type { PushDetail } from './push-content.ts'
 import { Temporal } from '@js-temporal/polyfill'
 import type { FamilyRecord, EventException, Task } from './family.ts'
 import { blankEvent } from './event-defaults.ts'
@@ -14,11 +15,12 @@ export interface ReminderJob {
   version: number
   subscriptionId: string
   due: string
+  detail: PushDetail
 }
 export function planReminders(sources: ReminderSource[], now: string): ReminderJob[] {
   const instant = Temporal.Instant.from(now),
     from = instant.subtract({ minutes: 15 }),
-    to = instant.add({ hours: 24 * 31 })
+    to = instant.add({ hours: 24 * 367 })
   const jobs: ReminderJob[] = []
   for (const source of sources) {
     let record: FamilyRecord<'event'>
@@ -52,11 +54,17 @@ export function planReminders(sources: ReminderSource[], now: string): ReminderJ
           continue
         for (const subscription of source.subscriptions)
           jobs.push({
-            id: `${record.id}:${record.version}:${occurrence.originalStart}:${reminder.minutes}:${subscription.id}`,
+            id: `${record.id}:${record.version}:${occurrence.originalStart}:${reminder.key}:${subscription.id}`,
             recordId: record.id,
             version: record.version,
             subscriptionId: subscription.id,
             due: reminder.due,
+            detail: {
+              title: occurrence.event.title,
+              start: occurrence.start,
+              allDay: occurrence.event.allDay,
+              timeZone: occurrence.event.timeZone,
+            },
           })
       }
   }

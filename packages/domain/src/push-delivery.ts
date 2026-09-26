@@ -1,10 +1,14 @@
-﻿export interface PushJob {
+import { detailedPushBody, type PushDetail } from './push-content.ts'
+
+export interface PushJob {
   id: string
   lease: string
   endpoint: string
   keys: { p256dh: string; auth: string }
   kind?: string
   action?: string
+  details?: PushDetail[]
+  total?: number
 }
 export async function deliverPushJobs(
   jobs: PushJob[],
@@ -38,7 +42,13 @@ export async function deliverPushJobs(
             throw Error('Destination refusée')
           await transport.send(
             { endpoint: job.endpoint, keys: job.keys },
-            JSON.stringify({ kind, id: job.id, entity: job.kind, action: job.action }),
+            JSON.stringify({
+              kind,
+              id: job.id,
+              entity: job.kind,
+              action: job.action,
+              body: detailedPushBody(kind, job.action, job.details, job.total),
+            }),
           )
         } catch (error) {
           const code =

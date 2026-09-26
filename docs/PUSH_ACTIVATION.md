@@ -26,7 +26,7 @@ Les migrations 001 à 006 existaient déjà. Ne pas rejouer `INSTALL.sql` ni les
 
 ## Utiliser les rappels avant événement
 
-Dans le formulaire de création ou de modification, ouvrir « Répétition, partage et autres options », puis « Rappels, en minutes avant le début ». Exemple : 15, 60 pour être averti 15 minutes et une heure avant. Jusqu’à cinq délais, de 0 à 43 200 minutes (30 jours) ; aucun rappel par défaut. Les délais sont partagés avec l’événement : les membres autorisés à le voir et inscrits aux notifications peuvent recevoir les rappels, auteur compris. Le cron serveur fonctionne aussi application fermée ; la réception exacte dépend du réseau et du système.
+Le bloc « Me rappeler » du formulaire propose des choix rapides et des délais personnalisés en minutes, heures, jours, semaines ou mois, jusqu’à cinq rappels. Les mois suivent le calendrier. Les délais restent partagés avec l’événement et les droits de lecture sont revérifiés avant envoi. Voir [CALENDAR_EXTRAS.md](CALENDAR_EXTRAS.md). Le cron fonctionne aussi application fermée ; la réception dépend du système et du réseau.
 
 ## Recette réelle à effectuer
 
@@ -34,6 +34,6 @@ Deux membres autorisent les notifications sur leurs appareils. Sur iPhone, ouvri
 
 ## Fonctionnement et limites
 
-Les événements, périodes, tâches, courses, enfants, catégories, invitations, profils, rôles et changements du foyer passent par une file transactionnelle privée. Les changements d’une transaction sont regroupés par appareil et foyer. Les droits sont revérifiés à la prise en charge, les endpoints expirés supprimés et les tentatives limitées. Aucun titre ni contenu familial n’est envoyé sur l’écran verrouillé. Les mutations rejouées avec le même identifiant ne créent pas d’alerte supplémentaire.
+Les événements, périodes, tâches, courses, enfants, catégories, invitations, profils, rôles et changements du foyer passent par une file transactionnelle privée. Les changements d’une transaction sont regroupés par appareil et foyer. Les droits sont revérifiés à la prise en charge, les endpoints expirés supprimés et les tentatives limitées. À la demande utilisateur du 26 septembre, les nouvelles notifications contiennent le titre, la date et l’heure ; les descriptions et listes de personnes ne sont pas transmises. Le système peut les afficher sur l’écran verrouillé. Les mutations rejouées avec le même identifiant ne créent pas d’alerte supplémentaire.
 
 La file conserve au maximum une journée d’alertes ; cinq tentatives sont possibles. Une erreur entre acceptation par le fournisseur push et confirmation en base peut provoquer une nouvelle livraison ; l’identifiant stable de l’alerte limite les doublons d’affichage. La réception dépend des permissions, du réseau et du système du téléphone. Les tests PGlite et les tests du transport simulé ne prouvent pas une réception sur iPhone réel.

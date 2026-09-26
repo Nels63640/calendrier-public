@@ -58,6 +58,7 @@ Deno.serve(async (request) => {
           p_version: job.version,
           p_subscription: job.subscriptionId,
           p_due: job.due,
+          p_detail: job.detail,
         })
       after = sources[sources.length - 1].record.id
       await rpc('reminder_cursor', {
@@ -65,15 +66,7 @@ Deno.serve(async (request) => {
       })
       if (sources.length < 100) break
     }
-    const jobs = await rpc<
-      {
-        id: string
-        lease: string
-        subscriptionId: string
-        endpoint: string
-        keys: { p256dh: string; auth: string }
-      }[]
-    >('claim_reminders')
+    const jobs = await rpc<PushJob[]>('claim_reminders')
     await deliverPushJobs(jobs, 'reminder', {
       send,
       finish: (id, lease, status) =>

@@ -87,3 +87,7 @@ L’activation serveur et le transfert explicitement autorisé sont terminés. L
 L’utilisateur répond « oui » à la demande explicite de push vers main de Nels63640/calendrier-public et de déploiement GitHub Pages associé. Cette autorisation lève le blocage de publication précédent. Publier les changements préparés et vérifier le résultat du workflow ainsi que le raccordement public.
 
 Publication et contrôle public réussis : commit 5beb948, workflow 36222436380. Aucun appareil abonné lors de la mise en service ; la livraison push sur téléphone reste à confirmer après consentement dans le profil. Les rappels sont configurés par événement, sans délai par défaut, et concernent les membres autorisés à voir l’événement.
+
+## 26 septembre 2026 : notifications détaillées et calendriers complémentaires
+
+L’utilisateur remplace explicitement les messages génériques par la date, l’heure et le titre pour rappels, ajouts et modifications. Il demande ensuite un choix de délais en minutes/heures/jours/semaines/mois, puis jours fériés, anniversaires et vacances par zone. Territoire confirmé : France métropolitaine, zones A/B/C. Conserver les contrôles de visibilité. Les mois sont civils, les anniversaires annuels, et les données publiques proviennent d’un instantané officiel embarqué. Les choix de couches sont des préférences d’affichage locales à l’appareil ; les anniversaires restent des événements privés au foyer en base. Voir CALENDAR_EXTRAS.md.

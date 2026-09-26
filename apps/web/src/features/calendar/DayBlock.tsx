@@ -29,8 +29,15 @@ export function DayBlock({
   const hold = useTimelineHold((minute) => onCreate(date, minute))
   const range = calendarWindow(date.toString(), 'day', zone)
   const dayEvents = useMemo(
-    () => records.flatMap((r) => expandEvent(r, exceptions, range.from, range.to)),
-    [records, exceptions, range.from, range.to],
+    () =>
+      records
+        .flatMap((r) => expandEvent(r, exceptions, range.from, range.to))
+        .filter(
+          (o) =>
+            !o.event.allDay ||
+            (o.start.slice(0, 10) <= date.toString() && o.end.slice(0, 10) > date.toString()),
+        ),
+    [records, exceptions, range.from, range.to, date],
   )
   const timed = dayEvents
     .filter((o) => !o.event.allDay)

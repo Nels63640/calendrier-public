@@ -1,3 +1,15 @@
+# Calendriers officiels, anniversaires et rappels enrichis : 26 septembre 2026
+
+Demandes intégrées : notifications avec date, heure et titre ; rappels en minutes/heures/jours/semaines/mois ; jours fériés de France métropolitaine et vacances des zones A/B/C sélectionnables ; anniversaires annuels. Sources officielles embarquées, préférences de zones propres à cet appareil. Détails et limites : [CALENDAR_EXTRAS.md](CALENDAR_EXTRAS.md).
+
+Production : migrations 009, 010 et 011 appliquées et fonction reminders version 2 ACTIVE. Les cinq dernières réponses du cron contrôlées sont HTTP 200, sans dépassement de délai. Le frontend public conserve encore son ancien Service Worker et ses anciens formulaires.
+
+Autorisation explicite reçue : « autorisé », pour les migrations 010 et 011 remplaçant la validation partagée. Les deux migrations sont appliquées avec succès, sans suppression de données. Publication GitHub Pages en cours.
+
+Validation : 41 tests unitaires réussis ; les six scénarios ciblés des nouvelles fonctions passent sous Chromium bureau/mobile et WebKit mobile. Contrôle visuel du sélecteur à 320 pixels effectué. Format conforme. Validation complète finale npm run check réussie : lint, compilation, 41 tests unitaires et 85 tests navigateur. Journal local : .local/extras-complete.log. Aucune réception sur téléphone physique prétendue.
+
+## Historique
+
 # Notifications et rappels publiés : 26 septembre 2026
 
 L’utilisateur a explicitement autorisé le transfert de .local/production-push.json vers Vault du projet xyfjpeojctmncpfymiyr. Les quatre valeurs ont été transférées sans affichage et sans régénération des clés. Migrations 007 et 008 appliquées, fonction reminders version 1 ACTIVE, cron family-reminders chaque minute et déclencheur wake_activity_worker installés. Appel authentifié réel : HTTP 200, processed=0 et activities=0 ; appels non autorisés : HTTP 401. Permissions SQL vérifiées : configuration refusée à anon/authenticated, réservée à service_role.

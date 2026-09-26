@@ -1,4 +1,7 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { BirthdayEditor } from './BirthdayEditor'
+import { CalendarLayersPanel } from './CalendarLayersPanel'
+import { publicCalendarRecords, readLayers, type CalendarLayers } from './public-calendars'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Temporal } from '@js-temporal/polyfill'
 import { Link } from 'react-router'
 import { useAccount } from '../auth/auth-context'
@@ -57,6 +60,21 @@ export function CalendarPage({ custody = false }: { custody?: boolean }) {
 function NativeCalendar() {
   const family = useFamily(),
     account = useAccount()
+  const [layers, setLayers] = useState(readLayers)
+  const [publicEvent, setPublicEvent] = useState<Occurrence | null>(null)
+  const [birthday, setBirthday] = useState(false)
+  const publicRecords = useMemo(
+    () => publicCalendarRecords(layers, account.profile?.time_zone ?? 'Europe/Paris'),
+    [layers, account.profile?.time_zone],
+  )
+  function changeLayers(value: CalendarLayers) {
+    setLayers(value)
+    try {
+      localStorage.setItem('family-calendar-layers', JSON.stringify(value))
+    } catch {
+      /* Affichage en mémoire si le stockage est refusé. */
+    }
+  }
   const zone = account.profile?.time_zone ?? 'Europe/Paris'
   const [now, setNow] = useState(() => Temporal.Now.zonedDateTimeISO(zone))
   const today = now.toPlainDate()
@@ -108,8 +126,16 @@ function NativeCalendar() {
     }
   }, [])
   const records = useMemo(
-    () => family.snapshot.records.filter((r) => r.kind === 'event') as FamilyRecord<'event'>[],
-    [family.snapshot.records],
+    () => [
+      ...(family.snapshot.records.filter(
+        (r) =>
+          r.kind === 'event' &&
+          (layers.birthdays ||
+            (r.payload as FamilyRecord<'event'>['payload']).eventType !== 'birthday'),
+      ) as FamilyRecord<'event'>[]),
+      ...publicRecords,
+    ],
+    [family.snapshot.records, publicRecords, layers.birthdays],
   )
   const first = visibleMonth.with(
     sheet === 'search' || view === 'year' ? { month: 1, day: 1 } : { day: 1 },
@@ -126,6 +152,10 @@ function NativeCalendar() {
   )
   function open(o: Occurrence) {
     setSheet(null)
+    if (o.eventId.startsWith('public:')) {
+      setPublicEvent(o)
+      return
+    }
     setEditor({
       record: records.find((r) => r.id === o.eventId),
       occurrence: o,
@@ -608,6 +638,14 @@ function NativeCalendar() {
           {sheet === 'calendars' && (
             <>
               <FamilyBar />
+              <CalendarLayersPanel
+                value={layers}
+                onChange={changeLayers}
+                onBirthday={() => {
+                  setSheet(null)
+                  setBirthday(true)
+                }}
+              />
               <nav className="calendar-tools" aria-label="Navigation du calendrier">
                 <Link to="/taches">
                   <Icon name="tasks" size={30} />
@@ -647,6 +685,41 @@ function NativeCalendar() {
               <p>{family.snapshot.members.length} membre(s) dans le foyer actif.</p>
             </div>
           )}
+        </CalendarSheet>
+      )}
+      {birthday && (
+        <CalendarSheet title="Nouvel anniversaire" onClose={() => setBirthday(false)}>
+          <FamilyGate>
+            <BirthdayEditor
+              onClose={() => {
+                setBirthday(false)
+                changeLayers({ ...layers, birthdays: true })
+              }}
+            />
+          </FamilyGate>
+        </CalendarSheet>
+      )}
+      {publicEvent && (
+        <CalendarSheet title={publicEvent.event.title} onClose={() => setPublicEvent(null)}>
+          <div className="calendar-public-detail">
+            <p>
+              {Temporal.PlainDate.from(publicEvent.start.slice(0, 10)).toLocaleString('fr', {
+                dateStyle: 'long',
+              })}
+              {publicEvent.end.slice(0, 10) !==
+              Temporal.PlainDate.from(publicEvent.start.slice(0, 10)).add({ days: 1 }).toString()
+                ? ' au ' +
+                  Temporal.PlainDate.from(publicEvent.end.slice(0, 10))
+                    .subtract({ days: 1 })
+                    .toLocaleString('fr', { dateStyle: 'long' })
+                : ''}
+            </p>
+            <p>{publicEvent.event.description}</p>
+            <p className="muted">Calendrier officiel en lecture seule.</p>
+            <a href={publicEvent.event.location} target="_blank" rel="noreferrer">
+              Consulter la source officielle
+            </a>
+          </div>
         </CalendarSheet>
       )}
       {editor && (
