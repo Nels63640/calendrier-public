@@ -4,6 +4,8 @@ Application SwiftUI native complémentaire au calendrier web, avec AlarmKit. Les
 
 ## Sur le Mac
 
+Commencer par chercher **Xcode** avec Spotlight (Cmd + Espace). Si Xcode ou XcodeGen ne peuvent pas être installés sur le Mac professionnel, utiliser un autre Mac autorisé. Une distribution TestFlight est une autre possibilité, mais demande une préparation et un compte développeur Apple ; elle n’est pas configurée ici.
+
 1. Installer **Xcode 26 ou plus récent** et l’ouvrir une première fois.
 2. Récupérer ce dépôt (Git clone ou téléchargement ZIP depuis GitHub).
 3. Installer XcodeGen : `brew install xcodegen` si Homebrew est déjà disponible.
@@ -34,6 +36,8 @@ La liste indique la dernière date réellement programmée pour chaque réveil. 
 Un refus de permission, un échec de stockage, un quota iOS ou une programmation partielle est visible. Une erreur ne doit jamais être interprétée comme une programmation réussie.
 
 ## Validation
+
+Compilation native et 17 tests réussis sur macOS / simulateur iPhone : [exécution 36231295121](https://github.com/Nels63640/calendrier-public/actions/runs/36231295121), code 5a0f6f4. Huit tests de dates, huit de persistance/permissions/reprise, un test d’interface. Aucune installation ni sonnerie sur un iPhone physique vérifiée dans cette session.
 
 `swift test --package-path apps/ios/AlarmCore` teste les dates, les changements d’heure, les semaines alternées, les bornes et les limites de capacité.
 
