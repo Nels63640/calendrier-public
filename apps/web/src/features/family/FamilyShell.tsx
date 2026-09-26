@@ -83,7 +83,7 @@ export function FamilyGate({ children }: { children: ReactNode }) {
           Se connecter
         </Link>
         <Link className="button" to="/">
-          Retour à l’accueil
+          Retour au calendrier
         </Link>
       </section>
     )

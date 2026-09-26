@@ -5,10 +5,10 @@ export function NotFoundPage() {
   return (
     <>
       <PageHeading eyebrow="UN PETIT DÉTOUR" title="Cette page est introuvable.">
-        Le lien a peut-être changé. Retrouvez votre espace depuis l’accueil.
+        Le lien a peut-être changé. Retrouvez votre espace depuis le calendrier.
       </PageHeading>
       <Link to="/" className="button primary">
-        Revenir à l’accueil
+        Revenir au calendrier
       </Link>
     </>
   )

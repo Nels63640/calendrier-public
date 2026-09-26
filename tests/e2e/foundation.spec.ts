@@ -1,16 +1,18 @@
 import { expect, test } from '@playwright/test'
 
-test('navigation, lien profond et retour vers l’accueil', async ({ page }) => {
+test('navigation, lien profond et retour vers le calendrier', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   await page.goto('/')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Le quotidien, ensemble.')
-  await page.getByRole('link', { name: /Les courses Une liste/ }).click()
+  await expect(page.locator('.native-calendar')).toBeVisible()
+  await expect(page.getByRole('link', { name: /accueil/i })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Ouvrir le menu' }).click()
+  await page.getByRole('link', { name: /Courses Notre liste/ }).click()
   await expect(page).toHaveURL(/\/courses$/)
   await expect(page.getByRole('heading', { level: 1 })).toBeFocused()
   await page.reload()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Les courses')
-  await page.getByRole('link', { name: 'Retour à l’accueil' }).click()
+  await page.getByRole('link', { name: 'Retour au calendrier' }).click()
   await expect(page).toHaveURL(/\/$/)
   expect(errors).toEqual([])
 })
@@ -39,7 +41,9 @@ test('le thème reste utilisable quand le stockage est refusé', async ({ page }
 
 test('le menu d’ajout se ferme au clavier et ouvre la rubrique choisie', async ({ page }) => {
   await page.goto('/')
-  const add = page.getByRole('button', { name: 'Ajouter', exact: true }).filter({ visible: true })
+  const add = page
+    .getByRole('button', { name: 'Ouvrir le menu', exact: true })
+    .filter({ visible: true })
   await add.click()
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
@@ -48,7 +52,7 @@ test('le menu d’ajout se ferme au clavier et ouvre la rubrique choisie', async
   await expect(dialog).not.toBeVisible()
   await expect(add).toBeFocused()
   await add.click()
-  await dialog.getByRole('link', { name: /Une période de garde/ }).click()
+  await dialog.getByRole('link', { name: /Garde Le rythme/ }).click()
   await expect(dialog).not.toBeVisible()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('La garde alternée')
   await expect(page.getByRole('heading', { level: 1 })).toBeFocused()
@@ -69,9 +73,9 @@ test('les rubriques restent dans la largeur de l’écran', async ({ page }) => 
   )
 })
 
-test('une route inconnue propose de retrouver l’accueil', async ({ page }) => {
+test('une route inconnue propose de retrouver le calendrier', async ({ page }) => {
   await page.goto('/page-inconnue')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cette page est introuvable.')
-  await page.getByRole('link', { name: 'Revenir à l’accueil' }).click()
+  await page.getByRole('link', { name: 'Revenir au calendrier' }).click()
   await expect(page).toHaveURL(/\/$/)
 })

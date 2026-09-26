@@ -92,7 +92,7 @@ function NativeCalendar() {
     periodEnd?: string
   } | null>(null)
   const scroll = useRef<HTMLDivElement>(null)
-  const prepareMonthZoom = useMonthZoom(view, date.toString(), scroll)
+  const { prepareMonthZoom, prepareYearZoom } = useMonthZoom(view, date.toString(), scroll)
   const touch = useRef<{ x: number; y: number } | null>(null)
   useEffect(() => {
     const id = setInterval(() => setNow(Temporal.Now.zonedDateTimeISO(zone)), 30000)
@@ -173,6 +173,7 @@ function NativeCalendar() {
     return (
       <button
         className="mini-month"
+        data-month={month.toString()}
         key={month.month}
         aria-label={monthLabel(month) + ' ' + month.year}
         onClick={(event) => {
@@ -206,6 +207,7 @@ function NativeCalendar() {
             className="glass back-control"
             aria-label={view === 'month' ? 'Afficher l’année' : 'Afficher le mois'}
             onClick={() => {
+              if (view === 'month') prepareYearZoom(visibleMonth.with({ day: 1 }).toString())
               endSelection()
               setDate(visibleMonth)
               setView(view === 'day' ? 'month' : 'year')
@@ -308,7 +310,14 @@ function NativeCalendar() {
       {(family.error || family.offline || family.pending > 0) && (
         <div className="native-sync" role="status">
           {family.error || (family.offline ? 'Hors connexion' : 'Modifications en attente')}{' '}
-          <button onClick={() => setSheet('calendars')}>Détails</button>
+          <button
+            onClick={(event) => {
+              event.currentTarget.focus({ preventScroll: true })
+              setSheet('calendars')
+            }}
+          >
+            Détails
+          </button>
         </div>
       )}
       <div
@@ -440,7 +449,13 @@ function NativeCalendar() {
               <button aria-label="Choisir une vue" onClick={() => setSheet('views')}>
                 <Glyph name="calendar" />
               </button>
-              <button aria-label="Ouvrir le menu" onClick={() => setSheet('calendars')}>
+              <button
+                aria-label="Ouvrir le menu"
+                onClick={(event) => {
+                  event.currentTarget.focus({ preventScroll: true })
+                  setSheet('calendars')
+                }}
+              >
                 <Glyph name="inbox" />
                 {family.snapshot.invitations.filter((i) => !i.used).length > 0 && (
                   <i className="invitation-dot" />

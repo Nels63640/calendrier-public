@@ -79,7 +79,7 @@ export function ModulePage({ module }: { module: keyof typeof modules }) {
         </ul>
       </section>
       <Link className="text-link" to="/">
-        Retour à l’accueil <Icon name="arrow" size={18} />
+        Retour au calendrier <Icon name="arrow" size={18} />
       </Link>
     </>
   )

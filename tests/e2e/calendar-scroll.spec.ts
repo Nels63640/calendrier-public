@@ -68,6 +68,9 @@ test('le zoom respecte la réduction des animations', async ({ page }) => {
   await page.getByRole('button', { name: 'septembre 2026', exact: true }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('septembre')
   await expect(page.locator('[data-zooming]')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Afficher l’année', exact: true }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('2026')
+  await expect(page.locator('[data-zooming]')).toHaveCount(0)
 })
 
 test('Aujourd’hui revient au vrai jour et le geste ne déclenche aucun repositionnement', async ({
@@ -121,4 +124,37 @@ test('Aujourd’hui revient au vrai jour et le geste ne déclenche aucun reposit
   await page.getByRole('button', { name: 'Aujourd’hui', exact: true }).click()
   await expect(heading).toHaveText('2026')
   await expect(page.locator('[data-year="2026"] .today')).toBeInViewport()
+})
+
+test('le retour du mois vers l’année anime un dézoom sur le bon mois', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-09-26T12:00:00Z'))
+  await page.goto('/')
+  await page.getByRole('button', { name: 'septembre 2026', exact: true }).click()
+  await expect(page.locator('[data-zooming]')).toHaveCount(0)
+  const transition = page.evaluate(
+    () =>
+      new Promise<string | undefined>((resolve) => {
+        const root = document.querySelector('.native-calendar')!
+        const observer = new MutationObserver(() => {
+          if (root.getAttribute('data-zooming') === 'out') {
+            const month = root.querySelector('[data-zoom-target]')?.getAttribute('data-month')
+            observer.disconnect()
+            clearTimeout(timeout)
+            resolve(month ?? undefined)
+          }
+        })
+        const timeout = setTimeout(() => {
+          observer.disconnect()
+          resolve(undefined)
+        }, 5000)
+        observer.observe(root, { attributes: true, attributeFilter: ['data-zooming'] })
+      }),
+  )
+  await page.getByRole('button', { name: 'Afficher l’année', exact: true }).click()
+  expect(await transition).toBe('2026-09-01')
+  const miniature = page.getByRole('button', { name: 'septembre 2026', exact: true })
+  await expect(page.locator('[data-zooming]')).toHaveCount(0)
+  await expect(miniature).toBeInViewport()
+  await expect(miniature.locator('.mini-grid')).toHaveCSS('transform', 'none')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('2026')
 })

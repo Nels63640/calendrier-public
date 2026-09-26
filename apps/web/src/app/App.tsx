@@ -3,7 +3,6 @@ import { Fragment, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router'
 import { Icon } from '../components/Icon'
 import { QuickAddDialog } from '../components/QuickAddDialog'
-import { HomePage } from '../features/dashboard/HomePage'
 import { CalendarPage } from '../features/calendar/CalendarPage'
 import { ListsPage } from '../features/family/ListsPage'
 import { HouseholdPage } from '../features/family/HouseholdPage'
@@ -22,7 +21,7 @@ export function App() {
   const familyKey = (account.user?.id ?? '') + family.active
   const [quickOpen, setQuickOpen] = useState(false)
   const { pathname } = useLocation()
-  const calendarHome = pathname === '/calendrier' || (pathname === '/' && Boolean(account.user))
+  const calendarHome = pathname === '/calendrier' || pathname === '/'
   const previousPath = useRef(pathname)
 
   const openQuickAdd = (event: MouseEvent<HTMLButtonElement>) => {
@@ -34,7 +33,7 @@ export function App() {
 
   useEffect(() => {
     const heading = document.querySelector<HTMLHeadingElement>('h1')
-    document.title = `${heading?.textContent ?? 'Accueil'} · Calendrier familial`
+    document.title = `${heading?.textContent ?? 'Calendrier'} · Calendrier familial`
     if (previousPath.current !== pathname) {
       window.scrollTo({ top: 0, behavior: 'instant' })
       heading?.focus({ preventScroll: true })
@@ -69,7 +68,7 @@ export function App() {
         Aller au contenu
       </a>
       <aside className="sidebar">
-        <Link to="/" className="brand" aria-label="Calendrier familial, accueil">
+        <Link to="/" className="brand" aria-label="Ouvrir le calendrier">
           <span className="brand-mark">
             <Icon name="home" size={24} />
           </span>
@@ -122,10 +121,7 @@ export function App() {
                 element={<AuthPage key={mode} mode={mode} />}
               />
             ))}
-            <Route
-              path="/"
-              element={account.user ? <CalendarPage key={familyKey} /> : <HomePage />}
-            />
+            <Route path="/" element={<CalendarPage key={familyKey} />} />
             <Route path="/calendrier" element={<CalendarPage key={familyKey} />} />
             <Route path="/taches" element={<ListsPage key={familyKey + 'tasks'} kind="task" />} />
             <Route

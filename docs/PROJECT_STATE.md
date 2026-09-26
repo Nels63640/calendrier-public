@@ -1,3 +1,15 @@
+# Entrée unique par le calendrier : 26 septembre 2026
+
+La route / affiche le calendrier pour tous, y compris hors connexion au compte. L’ancienne page HomePage est supprimée, l’onglet Accueil retiré, et les liens de retour/erreur renommés vers le calendrier. /calendrier reste compatible avec les anciens liens. Les fonctions familiales gardent leur demande de connexion ; aucune donnée privée n’est rendue publique.
+
+Le retour mois → année anime désormais la grille et le titre vers la miniature du mois affiché, recentrée dans la vue annuelle. La réduction des animations désactive le zoom dans les deux sens. Le bouton du menu reçoit explicitement le focus avant ouverture pour que Safari le restitue à la fermeture.
+
+Nouvelle icône statique représentant un calendrier noir et rouge, déclinée en SVG, PNG 192/512, Apple 180 et maskable. Elle ne prétend pas afficher la date du jour ; les installations iPhone existantes peuvent conserver leur ancienne icône. Rendu PNG contrôlé visuellement.
+
+Validation et publication à consigner.
+
+## Historique
+
 # Correctif Aujourd’hui et défilement : 26 septembre 2026
 
 Signalement utilisateur : Aujourd’hui revient sur 2027 et le défilement s’interrompt régulièrement sur iPhone. Le bouton rafraîchit maintenant l’horloge et remet à zéro la légende de période avant de recréer la vue. La vue annuelle centre le jour courant, avec un positionnement absolu. L’ancien recalage relatif conservait une dépendance à la position antérieure ; le signalement matériel n’a pas été reproduit sur un iPhone physique.

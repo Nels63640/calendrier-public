@@ -519,3 +519,15 @@ textarea {
     padding-inline: 7px;
   }
 }
+.mini-grid,
+.mini-month h2 {
+  transform-origin: 0 0;
+}
+.mini-month[data-zoom-target] {
+  position: relative;
+  z-index: 3;
+}
+.native-calendar[data-zooming='out'] .mini-month[data-zoom-target] .mini-grid,
+.native-calendar[data-zooming='out'] .mini-month[data-zoom-target] h2 {
+  will-change: transform, opacity;
+}

@@ -35,12 +35,16 @@ test('la navigation interne suit les changements de connexion', async ({ page, c
     .poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)))
     .toBe(true)
   await context.setOffline(true)
-  await page.getByRole('link', { name: 'Accueil', exact: true }).filter({ visible: true }).click()
-  await page.getByRole('link', { name: /Les courses Une liste/ }).click()
+  await page
+    .getByRole('link', { name: 'Calendrier', exact: true })
+    .filter({ visible: true })
+    .click()
+  await page.getByRole('button', { name: 'Ouvrir le menu' }).click()
+  await page.getByRole('link', { name: /Courses Notre liste/ }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Les courses')
   await expect(page.getByRole('status')).toContainText('Vous êtes hors connexion')
-  await page.getByRole('link', { name: 'Retour à l’accueil' }).click()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Le quotidien, ensemble.')
+  await page.getByRole('link', { name: 'Retour au calendrier' }).click()
+  await expect(page.locator('.native-calendar')).toBeVisible()
   const cached = await page.evaluate(async () =>
     (
       await Promise.all(

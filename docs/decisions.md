@@ -57,3 +57,11 @@ Deux jours cochés au minimum activent la création. Une période est continue, 
 ## 26 septembre 2026 — Préserver l’inertie du défilement
 
 Les compensations de position pendant le défilement peuvent interrompre l’inertie Safari. Ajouter les périodes suivantes sans scroll programmatique, charger plusieurs périodes en avance et différer le recyclage avec compensation jusqu’au repos (220 ms et aucun contact). Le retour Aujourd’hui invalide également la légende dérivée de la période précédente et centre le marqueur courant dans l’année.
+
+## 26 septembre 2026 — Supprimer la page Accueil
+
+La demande utilisateur supprime complètement l’ancienne entrée tableau de bord : le calendrier devient la route racine indépendamment de la session. Le lien historique /calendrier reste pris en charge. Les rubriques protégées continuent à exiger une connexion.
+
+## 26 septembre 2026 — Dézoom et icône calendrier
+
+Le retour vers l’année utilise la position réelle de la miniature du mois courant et une animation inverse, désactivée en réduction des animations. L’icône maison est remplacée par un calendrier noir et rouge, sans date fixe trompeuse. Le système iOS conserve la maîtrise du rafraîchissement des icônes déjà installées.
