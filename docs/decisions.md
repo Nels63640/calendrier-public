@@ -115,3 +115,7 @@ Conserver la session persistante du SDK et renouveler automatiquement ses jetons
 ## 26 septembre 2026 : conserver l’activation des notifications
 
 La demande utilisateur porte sur la stabilité des notifications malgré les reprises de session. Conserver l’abonnement navigateur après erreur réseau d’enregistrement et reprendre uniquement une activation explicite en attente, pour le même compte et le même endpoint. Ne pas réactiver automatiquement un abonnement volontairement désactivé. Distinguer état serveur inconnu et désactivation confirmée dans l’interface.
+
+## 26 septembre 2026 : modifier les anniversaires
+
+L’utilisateur demande de modifier nom, date et couleur des anniversaires déjà enregistrés. Réutiliser le formulaire dédié en édition de la série, avec identité et version existantes ; conserver rappels, partage et autorisations. Présenter jour/mois sans exiger l’année de naissance.

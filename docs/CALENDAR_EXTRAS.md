@@ -39,3 +39,7 @@ Actualisation explicite : `node scripts/update-public-calendars.mjs`, puis véri
 Migrations additives 009 (détails), 010 (unités) et 011 (anniversaires), puis redéploiement de reminders et publication du frontend. Les files et abonnements existants sont conservés. Ne pas rejouer INSTALL.sql sur la base existante.
 
 Validation et publication : voir PROJECT_STATE.md pour le résultat réel. Aucun test automatisé ne prouve la réception native d’une notification sur un téléphone.
+
+## Modifier un anniversaire existant
+
+Toucher l’anniversaire dans le calendrier ou le retrouver avec la recherche. Le formulaire « Modifier l’anniversaire » permet de changer le prénom/nom, le jour, le mois et la couleur, puis « Enregistrer les modifications ». Les rappels et le partage existants sont conservés. La modification concerne la série annuelle et ne crée pas de doublon. Auteur, propriétaire ou administrateur autorisé ; la confidentialité reste vérifiée côté serveur. La suppression demande confirmation et retire toute la série.

@@ -787,24 +787,34 @@ function NativeCalendar() {
             editor.periodEnd
               ? 'Créer une période'
               : editor.record
-                ? 'Événement'
+                ? editor.record.payload.eventType === 'birthday'
+                  ? 'Modifier l’anniversaire'
+                  : 'Événement'
                 : 'Nouvel événement'
           }
           onClose={() => setEditor(null)}
         >
           <FamilyGate>
-            <EventEditor
-              compact
-              key={
-                (editor.record?.id ?? 'new') +
-                (editor.occurrence?.originalStart ?? '') +
-                editor.date
-              }
-              {...editor}
-              onSaved={endSelection}
-              custody={Boolean(editor.record?.payload.custody)}
-              onClose={() => setEditor(null)}
-            />
+            {editor.record?.payload.eventType === 'birthday' ? (
+              <BirthdayEditor
+                key={editor.record.id}
+                record={editor.record}
+                onClose={() => setEditor(null)}
+              />
+            ) : (
+              <EventEditor
+                compact
+                key={
+                  (editor.record?.id ?? 'new') +
+                  (editor.occurrence?.originalStart ?? '') +
+                  editor.date
+                }
+                {...editor}
+                onSaved={endSelection}
+                custody={Boolean(editor.record?.payload.custody)}
+                onClose={() => setEditor(null)}
+              />
+            )}
           </FamilyGate>
         </CalendarSheet>
       )}

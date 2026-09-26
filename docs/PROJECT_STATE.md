@@ -1,3 +1,13 @@
+# Modification des anniversaires : 26 septembre 2026
+
+Les anniversaires existants ouvrent un formulaire dédié depuis la recherche ou une carte du calendrier. Nom, jour, mois et couleur sont préremplis et modifiables ; la sauvegarde conserve le même identifiant et la version attendue, les rappels, le fuseau, la visibilité et les autres métadonnées. La date est lue depuis la série, donc un 29 février ne devient pas définitivement un 28 lors de son édition une année non bissextile.
+
+Droits alignés sur les événements : auteur, propriétaire ou administrateur pour un anniversaire lisible ; lecture seule sinon. Suppression annuelle avec confirmation conservée dans le formulaire dédié. Aucune migration ni modification directe de données familiales en production.
+
+Validation locale : lint, types, compilation et format réussis. Premier npm run check : 44 tests unitaires et 96/97 tests navigateur réussis ; le nouveau test mobile ouvrait la recherche avant la restauration du foyer. Attente corrigée ; parcours final incluant modification, rechargement, couleur, 29 février et suppression avec annulation : 3/3 réussis sur Chromium bureau/mobile et WebKit mobile. Publication en cours. Aucun test sur iPhone physique.
+
+## Historique
+
 # Connexion persistante et reprise réseau : 26 septembre 2026
 
 Demande : éviter les déconnexions de l’application. La persistance et le renouvellement automatique du SDK étaient déjà activés. Correction de AuthStore : ne plus effacer le compte vérifié sur erreur réseau/503/429 ; reprise à la visibilité, au retour réseau et à la réouverture de page, avec nouvelles tentatives espacées de 5 à 60 s. getUser utilise le jeton courant du SDK. La session vide initiale passe par une vérification qui distingue erreur temporaire et absence réelle de session.
