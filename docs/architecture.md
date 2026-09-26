@@ -63,3 +63,7 @@ Hors ligne : lecture d’un cache privé borné, puis opérations simples avec i
 ## Outil de recette de la phase 3
 
 Le serveur Node sous scripts/push-proof est indépendant de la production et limité aux essais privés. Le frontend l’appelle via le proxy de Vite Preview ; code privé en mémoire, origine exacte, clés VAPID privées hors dépôt et abonnements temporaires. Le transport de production sera raccordé à l’authentification Supabase lors des phases concernées. Voir PWA_LOCAL_TEST.md.
+
+## Application iPhone complémentaire
+
+apps/ios contient une application SwiftUI iOS 26+ avec AlarmKit. AlarmCore isole la récurrence civile et ses tests. AlarmStore journalise les identifiants avant programmation iOS, réconcilie les réveils au premier plan et conserve les erreurs visibles. Les règles restent dans le stockage protégé de cet iPhone ; aucun nouveau droit Supabase ni pont JavaScript avec des secrets. Le calendrier est ouvert dans son navigateur habituel.

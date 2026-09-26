@@ -8,3 +8,10 @@ playwright-report
 **/dist-auth-test/
 
 **/dist-test/
+
+**/.build/
+**/.swiftpm/
+**/.derivedData/
+**/*.xcresult/
+**/*.xcodeproj/
+**/xcuserdata/

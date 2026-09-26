@@ -1,0 +1,56 @@
+name: FamilyCalendar
+options:
+  bundleIdPrefix: fr.familycalendar
+  deploymentTarget:
+    iOS: '26.0'
+packages:
+  AlarmCore:
+    path: AlarmCore
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    IPHONEOS_DEPLOYMENT_TARGET: '26.0'
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ''
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  FamilyCalendar:
+    type: application
+    platform: iOS
+    sources:
+      - path: FamilyCalendar
+    dependencies:
+      - package: AlarmCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: fr.familycalendar.reveils
+        PRODUCT_NAME: CalendrierFamilial
+        PRODUCT_MODULE_NAME: FamilyCalendar
+        TARGETED_DEVICE_FAMILY: '1'
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Calendrier familial
+        INFOPLIST_KEY_NSAlarmKitUsageDescription: Vos réveils sonnent aux horaires que vous choisissez, même lorsque cette application est fermée.
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        MARKETING_VERSION: '0.2.0'
+        CURRENT_PROJECT_VERSION: 1
+  FamilyCalendarTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: FamilyCalendarTests
+    dependencies:
+      - target: FamilyCalendar
+      - package: AlarmCore
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  FamilyCalendar:
+    build:
+      targets:
+        FamilyCalendar: all
+        FamilyCalendarTests: [test]
+    test:
+      targets: [FamilyCalendarTests]

@@ -95,3 +95,7 @@ L’utilisateur remplace explicitement les messages génériques par la date, l�
 ## 26 septembre 2026 : edition partagee
 
 Les proprietaires et administrateurs peuvent modifier les evenements auxquels ils ont acces, y compris les occurrences. Les evenements prives restent invisibles et non modifiables aux autres. Le statut des notifications est verifie sur le serveur pour le compte courant ; les creations precedant l inscription ne sont pas rejouees.
+
+## 26 septembre 2026 : vrais réveils iPhone
+
+La PWA ne peut pas fournir une alarme système : ajouter une cible native AlarmKit pour iOS 26+. Réveils personnels, ponctuels, hebdomadaires ou A/B avec ancrage civil. L’alternance est une programmation bornée renouvelée à l’ouverture, avec couverture affichée, car AlarmKit ne fournit pas de récurrence de deux semaines. Aucun traitement de fond garanti, aucune intégration automatique des gardes, aucune installation sur iPhone prétendue depuis Windows. Mac et signature personnelle nécessaires pour la recette physique.

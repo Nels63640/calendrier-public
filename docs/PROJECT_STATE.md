@@ -1,3 +1,13 @@
+# Version iPhone : réveils AlarmKit en préparation — 26 septembre 2026
+
+Demande : vrais réveils iPhone, ponctuels ou récurrents, jours au choix et horaires différents selon les semaines de garde. L’utilisateur indique iOS 26.6.2, un Mac au travail et un PC chez lui. Ajout dans apps/ios d’une application SwiftUI/AlarmKit iOS 26+, complémentaire à la PWA. Réveils personnels locaux ; le calendrier existant reste accessible par un lien. Aucun compte Apple ni certificat détenu par cet environnement. Installation physique à effectuer sur le Mac.
+
+Récurrence hebdomadaire gérée nativement par iOS ; alternance A/B ancrée sur une date civile, préparée sur 56 jours dans une enveloppe de 48 alarmes. Date limite affichée et renouvellement au premier plan ; ne pas prétendre une récurrence bimensuelle native infinie. Gardes non synchronisées automatiquement. Son système, Arrêter ; pas de snooze.
+
+Moteur Swift indépendant, tests calendaires et tests de persistance/reprise iOS ajoutés. Compilation macOS et validation en cours. Aucune sonnerie physique vérifiée, aucune version native installée ni publiée sur App Store/TestFlight. Procédure : [apps/ios/README.md](../apps/ios/README.md).
+
+## Historique
+
 # Edition partagee et diagnostic notifications : 26 septembre 2026
 
 Demande : permettre les modifications entre proprietaire et administrateur, et expliquer les notifications absentes. Migrations 012 et 013 appliquees : save_record et change_occurrence autorisent owner/admin sur les evenements lisibles uniquement ; confidentialite, version et auteur original conserves. Interface EventEditor alignee. Nouveau RPC push_registered limite au compte courant ; le statut du navigateur seul ne suffit plus. Reactivation reutilise un abonnement existant au lieu de le remplacer.
