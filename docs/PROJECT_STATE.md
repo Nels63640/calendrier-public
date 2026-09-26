@@ -1,14 +1,10 @@
-# Version iPhone compilée : installation à effectuer — 26 septembre 2026
+# Réveils iPhone abandonnés : 26 septembre 2026
 
-Demande : vrais réveils iPhone, ponctuels ou récurrents, jours au choix et horaires différents selon les semaines de garde. L’utilisateur indique iOS 26.6.2, un Mac au travail et un PC chez lui. Ajout dans apps/ios d’une application SwiftUI/AlarmKit iOS 26+, complémentaire à la PWA. Réveils personnels locaux ; le calendrier existant reste accessible par un lien. Aucun compte Apple ni certificat détenu par cet environnement. Installation physique à effectuer sur le Mac.
+À la demande de l’utilisateur, la partie native iPhone est abandonnée et retirée : projet apps/ios, tests Swift, guide Mac, workflow de compilation iOS et exclusions associées. Aucun réveil installé sur téléphone, aucune distribution App Store/TestFlight et aucune donnée Supabase spécifique aux alarmes à supprimer.
 
-Récurrence hebdomadaire gérée nativement par iOS ; alternance A/B ancrée sur une date civile, préparée sur 56 jours dans une enveloppe de 48 alarmes. Date limite affichée et renouvellement au premier plan ; ne pas prétendre une récurrence bimensuelle native infinie. Gardes non synchronisées automatiquement. Son système, Arrêter ; pas de snooze.
+Le calendrier web, ses notifications et ses rappels restent inchangés. Ne pas reprendre le chantier natif sans nouvelle demande. Le code historique reste récupérable dans Git (dernière version documentée : 2df4fe6).
 
-Validation finale du code 5a0f6f4 : workflow iPhone 36231295121 réussi sur macOS, compilation du projet Xcode et 17 tests (8 calendaires, 8 de persistance/permissions/reprise, 1 parcours d’interface sur simulateur). Configuration CI finale identique à celle de cette validation. Les erreurs de permission, de quota et de stockage restent visibles ; une ouverture à l’heure du réveil ne doit pas annuler une sonnerie. Dates ponctuelles et références A/B conservées sous forme civile. Validation web locale réussie : 42 tests unitaires, 85 navigateur, lint, compilation et format.
-
-Installation physique en attente : l’utilisateur ne sait pas si Xcode est présent sur le Mac du travail et indique que les installations peuvent être bloquées. Commencer par Spotlight > Xcode ; autre Mac autorisé ou future distribution TestFlight si nécessaire. Aucune sonnerie physique vérifiée, aucune version native installée ni publiée sur App Store/TestFlight. Procédure : [apps/ios/README.md](../apps/ios/README.md).
-
-L’option d’exporter le projet source complet en artifact GitHub Actions a été refusée par le contrôle automatique faute d’autorisation pour cette destination. Aucun export supplémentaire créé ni contournement. Les sources restent dans le dépôt GitHub déjà utilisé ; les résultats de tests Xcode sont disponibles dans le workflow autorisé.
+Validation du nettoyage : lint, compilation, format et 42 tests unitaires réussis. Suite navigateur : 84/85 au premier passage (échec de défilement WebKit), puis les 4 scénarios de défilement WebKit réussis en relance ciblée. Aucun code web ni Supabase modifié.
 
 ## Historique
 
