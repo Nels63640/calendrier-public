@@ -113,6 +113,144 @@ test.describe('comptes avec API Supabase simulée', () => {
     await expect(page.getByRole('link', { name: 'Se connecter', exact: true })).toBeVisible()
   })
 
+  test('reprise après erreur réseau et renouvellement d’une session expirée', async ({ page }) => {
+    await backend(page)
+    await page.goto('/auth/connexion')
+    await page.getByLabel('Adresse e-mail').fill(user.email)
+    await page.getByLabel('Mot de passe', { exact: true }).fill('une-longue-phrase-test')
+    await page.getByRole('button', { name: 'Se connecter', exact: true }).click()
+    await page.getByRole('button', { name: 'Ouvrir le menu' }).click()
+    await page.getByRole('link', { name: /Mon profil/ }).click()
+    await page.getByText('Modifier mon profil', { exact: true }).click()
+    await expect(page.getByLabel('Prénom')).toHaveValue('Alice')
+    await page.route('**/auth/v1/user', (route) =>
+      route.fulfill({ status: 503, json: { message: 'Temporary outage' } }),
+    )
+    await page.reload()
+    await expect(
+      page.getByText('Connexion en cours de rétablissement. Votre compte est conservé.'),
+    ).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Se déconnecter' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Se connecter', exact: true })).toHaveCount(0)
+    await page.unroute('**/auth/v1/user')
+    await page.evaluate(() => window.dispatchEvent(new Event('online')))
+    await expect(
+      page.getByText('Connexion en cours de rétablissement. Votre compte est conservé.'),
+    ).toHaveCount(0)
+    let refreshes = 0
+    page.on('request', (request) => {
+      if (request.url().includes('/token?grant_type=refresh_token')) refreshes++
+    })
+    await page.evaluate(() => {
+      const key = Object.keys(localStorage).find((key) => key.startsWith('family-calendar:auth:'))!
+      const value = JSON.parse(localStorage.getItem(key)!)
+      value.expires_at = Math.floor(Date.now() / 1000) - 60
+      localStorage.setItem(key, JSON.stringify(value))
+    })
+    await page.reload()
+    await expect(page.getByRole('button', { name: 'Se déconnecter' })).toBeVisible()
+    await expect.poll(() => refreshes).toBeGreaterThan(0)
+    await page.getByRole('button', { name: 'Se déconnecter' }).click()
+    await expect(page.getByRole('link', { name: 'Se connecter', exact: true })).toBeVisible()
+    await page.reload()
+    await expect(page.getByRole('link', { name: 'Se connecter', exact: true })).toBeVisible()
+  })
+
+  test('une activation push interrompue est conservée puis reprise sans nouvelle permission', async ({
+    page,
+  }) => {
+    await backend(page)
+    let available = false
+    let registered = false
+    let registrations = 0
+    await page.route('**/rest/v1/rpc/register_push', async (route) => {
+      registrations++
+      if (!available) return route.fulfill({ status: 503, json: { message: 'Temporary outage' } })
+      registered = true
+      await route.fulfill({ json: 'test-subscription' })
+    })
+    await page.route('**/rest/v1/rpc/push_registered', (route) =>
+      route.fulfill({ json: registered }),
+    )
+    await page.route('**/rest/v1/rpc/disable_push', async (route) => {
+      registered = false
+      await route.fulfill({ json: null })
+    })
+    await page.addInitScript(() => {
+      const increment = (key: string) =>
+        localStorage.setItem(key, String(Number(localStorage.getItem(key) ?? 0) + 1))
+      Object.defineProperty(window, 'Notification', {
+        configurable: true,
+        value: class {
+          static permission = 'granted'
+          static async requestPermission() {
+            increment('test-permission')
+            return 'granted'
+          }
+        },
+      })
+      if (!('PushManager' in window))
+        Object.defineProperty(window, 'PushManager', { value: class {} })
+      const subscription = {
+        endpoint: 'https://web.push.apple.com/test-persistent',
+        toJSON: () => ({ keys: { p256dh: 'public-test', auth: 'test' } }),
+        unsubscribe: async () => {
+          increment('test-unsubscribe')
+          localStorage.removeItem('test-subscribed')
+          return true
+        },
+      }
+      Object.defineProperty(navigator.serviceWorker, 'getRegistration', {
+        value: async () => ({
+          active: {},
+          pushManager: {
+            getSubscription: async () =>
+              localStorage.getItem('test-subscribed') ? subscription : null,
+            subscribe: async () => {
+              localStorage.setItem('test-subscribed', 'yes')
+              return subscription
+            },
+          },
+        }),
+      })
+    })
+    await page.goto('/auth/connexion')
+    await page.getByLabel('Adresse e-mail').fill(user.email)
+    await page.getByLabel('Mot de passe', { exact: true }).fill('une-longue-phrase-test')
+    await page.getByRole('button', { name: 'Se connecter', exact: true }).click()
+    await page.getByRole('button', { name: 'Ouvrir le menu' }).click()
+    await page.getByRole('link', { name: /Mon profil/ }).click()
+    await page.getByText('Notifications', { exact: true }).click()
+    await page.getByRole('button', { name: 'Activer sur cet appareil', exact: true }).click()
+    await expect(
+      page.getByText('Activation en attente du réseau. Votre autorisation est conservée.'),
+    ).toBeVisible()
+    expect(await page.evaluate(() => localStorage.getItem('test-unsubscribe'))).toBeNull()
+    await page.reload()
+    await expect.poll(() => registrations).toBeGreaterThan(1)
+    available = true
+    await page.evaluate(() => window.dispatchEvent(new Event('online')))
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('family-calendar:pending-push')))
+      .toBeNull()
+    await page.getByText('Notifications', { exact: true }).click()
+    await expect(
+      page.getByRole('button', { name: 'Désactiver sur cet appareil', exact: true }),
+    ).toBeVisible()
+    expect(await page.evaluate(() => localStorage.getItem('test-permission'))).toBe('1')
+    const previous = registrations
+    await page.getByRole('button', { name: 'Désactiver sur cet appareil', exact: true }).click()
+    await expect(
+      page.getByText('Les notifications sont désactivées sur cet appareil.'),
+    ).toBeVisible()
+    await page.evaluate(() => window.dispatchEvent(new Event('online')))
+    await expect(
+      page.getByRole('button', { name: 'Activer sur cet appareil', exact: true }),
+    ).toBeVisible()
+    expect(registrations).toBe(previous)
+    expect(await page.evaluate(() => localStorage.getItem('test-unsubscribe'))).toBe('1')
+  })
+
   test('inscription, code expiré puis vérification', async ({ page }) => {
     await backend(page)
     await page.goto('/auth/inscription')

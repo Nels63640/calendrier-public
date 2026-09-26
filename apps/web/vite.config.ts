@@ -29,6 +29,9 @@ export default defineConfig(({ mode }) => {
     define:
       testing || localTest
         ? {
+            'import.meta.env.VITE_VAPID_PUBLIC_KEY': JSON.stringify(
+              testing ? 'B' + 'A'.repeat(86) : '',
+            ),
             'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
             'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(
               env.VITE_SUPABASE_PUBLISHABLE_KEY,

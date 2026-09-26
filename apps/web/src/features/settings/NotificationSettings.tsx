@@ -1,3 +1,5 @@
+import { queuePush, pendingPush, cancelPendingPush, settlePendingPush } from './pending-push'
+import { recoverPush } from './usePushRecovery'
 import { useEffect, useState } from 'react'
 import { useAccount } from '../auth/auth-context'
 import { useAccountAction } from '../auth/useAccountAction'
@@ -8,21 +10,55 @@ export function NotificationSettings() {
   const account = useAccount(),
     action = useAccountAction()
   const [enabled, setEnabled] = useState(false)
+  const [verification, setVerification] = useState<'checking' | 'verified' | 'unavailable'>(
+    'checking',
+  )
+  const [queued, setQueued] = useState(false)
   const key = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined
   const supported =
     'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
   useEffect(() => {
-    if (supported)
-      void navigator.serviceWorker
-        .getRegistration()
-        .then((r) => r?.pushManager.getSubscription())
-        .then(async (s) =>
-          setEnabled(
-            Boolean(s) && (await rpc<boolean>('push_registered', { p_endpoint: s!.endpoint })),
-          ),
-        )
-        .catch(() => {})
-  }, [supported, account.user?.id])
+    let active = true
+    let version = 0
+    const userId = account.user?.id
+    const check = async () => {
+      if (!supported || !userId) return
+      const request = ++version
+      try {
+        const registration = await navigator.serviceWorker.getRegistration()
+        const subscription = await registration?.pushManager.getSubscription()
+        const registered =
+          Boolean(subscription) &&
+          (await rpc<boolean>('push_registered', { p_endpoint: subscription!.endpoint }))
+        if (active && request === version) {
+          setEnabled(registered && Notification.permission === 'granted')
+          setVerification('verified')
+          setQueued(pendingPush()?.userId === userId)
+        }
+      } catch {
+        if (active && request === version) {
+          setVerification('unavailable')
+          setQueued(pendingPush()?.userId === userId)
+        }
+      }
+    }
+    const refresh = () => {
+      void check()
+    }
+    const visible = () => {
+      if (document.visibilityState === 'visible') refresh()
+    }
+    refresh()
+    window.addEventListener('online', refresh)
+    window.addEventListener('family-push-status', refresh)
+    document.addEventListener('visibilitychange', visible)
+    return () => {
+      active = false
+      window.removeEventListener('online', refresh)
+      window.removeEventListener('family-push-status', refresh)
+      document.removeEventListener('visibilitychange', visible)
+    }
+  }, [supported, account.user?.id, account.recovering])
   async function enable() {
     if (!key)
       throw new AccountError('Les notifications ne sont pas encore raccordées à cet espace.')
@@ -44,21 +80,25 @@ export function NotificationSettings() {
         userVisibleOnly: true,
         applicationServerKey: bytes,
       }))
+    queuePush(account.user!.id, subscription.endpoint)
+    setQueued(true)
     try {
-      const json = subscription.toJSON()
-      await rpc('register_push', {
-        p_endpoint: subscription.endpoint,
-        p_p256dh: json.keys?.p256dh,
-        p_auth: json.keys?.auth,
-      })
+      await recoverPush(account.user!.id)
+      if (pendingPush()?.userId === account.user!.id)
+        return 'Autorisation conservée. L’activation reprendra automatiquement avec la connexion.'
       setEnabled(true)
+      setVerification('verified')
+      setQueued(false)
       return 'Les notifications sont activées sur cet appareil.'
-    } catch (error) {
-      if (!old) await subscription.unsubscribe()
-      throw error
+    } catch {
+      // Le serveur peut avoir enregistré l'abonnement avant une coupure de la réponse.
+      // Ne jamais détruire l'abonnement du téléphone sur une erreur réseau.
+      return 'Autorisation conservée. L’activation reprendra automatiquement avec la connexion.'
     }
   }
   async function disable() {
+    cancelPendingPush()
+    await settlePendingPush()
     const subscription = await (
       await navigator.serviceWorker.getRegistration()
     )?.pushManager.getSubscription()
@@ -67,6 +107,8 @@ export function NotificationSettings() {
       await subscription.unsubscribe()
     }
     setEnabled(false)
+    setQueued(false)
+    setVerification('verified')
     return 'Les notifications sont désactivées sur cet appareil.'
   }
   if (!account.user) return null
@@ -95,20 +137,30 @@ export function NotificationSettings() {
         <div className="row-actions">
           <button
             className="button primary"
-            disabled={action.busy}
+            disabled={action.busy || verification === 'checking'}
             onClick={() => {
-              void action.run(enabled ? disable : enable)
+              void action.run(verification === 'verified' && enabled ? disable : enable)
             }}
           >
-            {enabled ? 'Désactiver sur cet appareil' : 'Activer sur cet appareil'}
+            {verification === 'checking'
+              ? 'Vérification…'
+              : verification === 'unavailable'
+                ? 'Vérifier l’activation'
+                : enabled
+                  ? 'Désactiver sur cet appareil'
+                  : 'Activer sur cet appareil'}
           </button>
           <button
             className="button"
             disabled={action.busy}
             onClick={() => {
               void action.run(async () => {
+                cancelPendingPush()
+                await settlePendingPush()
                 await rpc('disable_push', {})
                 setEnabled(false)
+                setQueued(false)
+                setVerification('verified')
                 return 'Tous vos appareils ont été désinscrits.'
               })
             }}
@@ -117,6 +169,19 @@ export function NotificationSettings() {
           </button>
         </div>
       )}
+      {verification === 'unavailable' && (
+        <p role="status">
+          Vérification temporairement indisponible. Vos notifications ne sont pas désactivées par
+          cette erreur.
+        </p>
+      )}
+      {queued && (
+        <p role="status">Activation en attente du réseau. Votre autorisation est conservée.</p>
+      )}
+      <p>
+        Vos notifications restent inscrites pendant une coupure réseau ou la reprise de votre
+        session.
+      </p>
       <p role={action.failed ? 'alert' : 'status'}>{action.message}</p>
     </section>
   )

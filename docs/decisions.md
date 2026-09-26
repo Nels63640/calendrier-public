@@ -107,3 +107,11 @@ L’utilisateur abandonne les réveils après clarification des contraintes d’
 ## 26 septembre 2026 : balayage journalier
 
 L’utilisateur demande le défilement gauche/droite dans la vue horaire. Ajouter un geste horizontal sur les heures et le bandeau des jours, garder le défilement vertical existant et la même heure affichée au changement. Ne pas confondre balayage, appui long de création et toucher d’un événement.
+
+## 26 septembre 2026 : rester connecté
+
+Conserver la session persistante du SDK et renouveler automatiquement ses jetons. Ne pas traiter une panne réseau comme une déconnexion ; préserver uniquement le compte déjà vérifié et reprendre au retour de l’application. Respecter une révocation réelle et une déconnexion explicite. Ne pas promettre une session indestructible si le navigateur efface ses données.
+
+## 26 septembre 2026 : conserver l’activation des notifications
+
+La demande utilisateur porte sur la stabilité des notifications malgré les reprises de session. Conserver l’abonnement navigateur après erreur réseau d’enregistrement et reprendre uniquement une activation explicite en attente, pour le même compte et le même endpoint. Ne pas réactiver automatiquement un abonnement volontairement désactivé. Distinguer état serveur inconnu et désactivation confirmée dans l’interface.

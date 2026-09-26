@@ -1,3 +1,15 @@
+# Connexion persistante et reprise réseau : 26 septembre 2026
+
+Demande : éviter les déconnexions de l’application. La persistance et le renouvellement automatique du SDK étaient déjà activés. Correction de AuthStore : ne plus effacer le compte vérifié sur erreur réseau/503/429 ; reprise à la visibilité, au retour réseau et à la réouverture de page, avec nouvelles tentatives espacées de 5 à 60 s. getUser utilise le jeton courant du SDK. La session vide initiale passe par une vérification qui distingue erreur temporaire et absence réelle de session.
+
+Le compte précédemment vérifié peut rester affiché pendant une panne, dans la limite du cache existant de 7 jours ; aucun droit serveur supplémentaire. Une déconnexion volontaire, une session refusée/révoquée ou la suppression des données du navigateur reste effective. Aucun mot de passe stocké. Le profil modifié est aussi actualisé dans le cache de reprise.
+
+Notifications : diagnostic serveur sans erreur de livraison enregistrée, puis l’utilisateur confirme la réception rétablie et demande de conserver l’activation. Le frontend ne supprime plus un nouvel abonnement après une erreur de register_push : la réponse peut avoir été perdue après succès serveur. Une activation explicitement demandée et interrompue est conservée par compte/endpoint pendant 24 h et reprise au premier plan, au retour réseau ou toutes les 15 s tant que la page est visible. Aucun nouveau consentement demandé automatiquement, aucun renouvellement d’abonnement navigateur en arrière-plan. Les abonnements déjà enregistrés restent inchangés ; désactivation volontaire et déconnexion explicite annulent la reprise en attente avant désinscription. Un échec de vérification s’affiche comme indisponible, pas comme désactivé. Aucune modification Supabase.
+
+Validation locale finale : npm run check et format réussis, 44 tests unitaires et 94 tests navigateur. Tests réseau/session expirée et activation push interrompue sur Chromium bureau/mobile et WebKit mobile ; API Auth, PushManager et serveur simulés, aucune nouvelle notification envoyée aux téléphones. Le premier passage avait deux échecs : rechargement du test avant fin de déconnexion (attente corrigée), puis défilement WebKit intermittent déjà observé avant cette intervention. La suite finale complète passe sans relance. Publication en cours.
+
+## Historique
+
 # Balayage horizontal des journées : 26 septembre 2026
 
 Dans la vue journée, glisser vers la gauche ouvre le lendemain et vers la droite la veille, depuis les heures ou le bandeau des jours. Le changement conserve l’heure visible, traverse les semaines/mois et applique une transition courte respectant la réduction des animations. Le geste vertical reste natif ; un déplacement annule l’appui long et le clic issu du balayage est neutralisé.

@@ -71,3 +71,101 @@ test('une réponse de profil retardée ne réaffiche pas le compte déconnecté'
   assert.equal(store.getSnapshot().profile, null)
   stop()
 })
+
+test('la session résiste aux pannes temporaires mais respecte révocation et déconnexion', async (t) => {
+  const memory = new Map<string, string>()
+  const descriptors = ['localStorage', 'navigator'].map(
+    (key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)] as const,
+  )
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: {
+      getItem: (key: string) => memory.get(key) ?? null,
+      setItem: (key: string, value: string) => memory.set(key, value),
+      removeItem: (key: string) => memory.delete(key),
+    },
+  })
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { onLine: true } })
+  t.after(() => {
+    for (const [key, descriptor] of descriptors) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor)
+      else Reflect.deleteProperty(globalThis, key)
+    }
+  })
+  let callback: (event: AuthChangeEvent, session: Session | null) => void = () => {}
+  const session = { access_token: 'synthetic', user: { id: 'alice' } } as Session
+  let userStatus = 0
+  let sessionError = false
+  let requests = 0
+  const profile = {
+    id: 'alice',
+    first_name: 'Alice',
+    avatar: 'profile',
+    time_zone: 'UTC',
+    created_at: '',
+    updated_at: '',
+  } as Profile
+  const client = {
+    auth: {
+      onAuthStateChange(fn: typeof callback) {
+        callback = fn
+        return { data: { subscription: { unsubscribe() {} } } }
+      },
+      async getSession() {
+        requests++
+        if (sessionError) throw new TypeError('Failed to fetch')
+        return { data: { session }, error: null }
+      },
+      async getUser() {
+        return userStatus
+          ? { data: { user: null }, error: { status: userStatus } }
+          : {
+              data: {
+                user: {
+                  id: 'alice',
+                  email: 'alice@example.test',
+                  email_confirmed_at: '2026-09-25',
+                },
+              },
+              error: null,
+            }
+      },
+    },
+  } as unknown as SupabaseClient
+  const store = new AuthStore(client, async () => profile)
+  let stop = store.start()
+  t.after(() => stop())
+  callback('SIGNED_IN', session)
+  await new Promise((resolve) => setTimeout(resolve, 20))
+  assert.equal(store.getSnapshot().user?.id, 'alice')
+  userStatus = 503
+  await store.retry()
+  assert.equal(store.getSnapshot().user?.id, 'alice')
+  assert.equal(store.getSnapshot().recovering, true)
+  assert.equal(store.getSnapshot().profile?.first_name, 'Alice')
+  userStatus = 0
+  await store.retry()
+  assert.equal(store.getSnapshot().recovering, undefined)
+  sessionError = true
+  await store.retry()
+  assert.equal(store.getSnapshot().user?.id, 'alice')
+  stop()
+  // Une réouverture sans réseau conserve uniquement le compte précédemment vérifié.
+  const reopened = new AuthStore(client, async () => profile)
+  stop = reopened.start()
+  callback('INITIAL_SESSION', null)
+  await new Promise((resolve) => setTimeout(resolve, 20))
+  assert.equal(reopened.getSnapshot().user?.id, 'alice')
+  sessionError = false
+  userStatus = 401
+  await reopened.retry()
+  assert.equal(reopened.getSnapshot().status, 'signed-out')
+  assert.equal(memory.has('family-calendar:verified-account'), false)
+  userStatus = 0
+  callback('SIGNED_IN', session)
+  await new Promise((resolve) => setTimeout(resolve, 20))
+  callback('SIGNED_OUT', null)
+  assert.equal(reopened.getSnapshot().user, null)
+  assert.equal(memory.has('family-calendar:verified-account'), false)
+  assert.ok(requests >= 4)
+})

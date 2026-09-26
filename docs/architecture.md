@@ -63,3 +63,7 @@ Hors ligne : lecture d’un cache privé borné, puis opérations simples avec i
 ## Outil de recette de la phase 3
 
 Le serveur Node sous scripts/push-proof est indépendant de la production et limité aux essais privés. Le frontend l’appelle via le proxy de Vite Preview ; code privé en mémoire, origine exacte, clés VAPID privées hors dépôt et abonnements temporaires. Le transport de production sera raccordé à l’authentification Supabase lors des phases concernées. Voir PWA_LOCAL_TEST.md.
+
+## Reprise des sessions
+
+AuthStore distingue erreur temporaire et session invalide. La persistance et le renouvellement restent confiés au SDK Supabase ; getUser vérifie le jeton courant. Le compte vérifié en cache (7 jours maximum) peut maintenir l’interface lors d’une panne, sans remplacer les contrôles Auth/RLS des requêtes serveur. Reprise sur online, pageshow, visibilitychange et temporisation progressive ; génération et déconnexion explicite invalident les réponses tardives.

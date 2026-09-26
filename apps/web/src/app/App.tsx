@@ -1,3 +1,4 @@
+import { usePushRecovery } from '../features/settings/usePushRecovery'
 import { useFamily } from '../features/family/family-context'
 import { Fragment, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router'
@@ -16,6 +17,7 @@ import { AuthPage } from '../features/auth/AuthPage'
 import { navigation } from './navigation'
 
 export function App() {
+  usePushRecovery()
   const account = useAccount()
   const family = useFamily()
   const familyKey = (account.user?.id ?? '') + family.active

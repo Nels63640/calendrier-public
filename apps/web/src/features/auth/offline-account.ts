@@ -21,9 +21,18 @@ export function forgetAccount() {
 }
 export function offlineAccount(id: string): VerifiedAccount | null {
   if (typeof navigator === 'undefined' || navigator.onLine) return null
+  return rememberedAccount(id)
+}
+export function rememberedAccount(id?: string): VerifiedAccount | null {
   try {
     const value = JSON.parse(localStorage.getItem(key) ?? 'null') as VerifiedAccount | null
-    return value?.user.id === id && Date.now() - value.at < 7 * 86400000 ? value : null
+    return value?.user?.id &&
+      (!id || value.user.id === id) &&
+      Number.isFinite(value.at) &&
+      Date.now() - value.at >= 0 &&
+      Date.now() - value.at < 7 * 86400000
+      ? value
+      : null
   } catch {
     return null
   }

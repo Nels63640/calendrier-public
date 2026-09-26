@@ -1,3 +1,4 @@
+import { cancelPendingPush, settlePendingPush } from '../settings/pending-push'
 import { clearOffline } from '../family/offline'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
@@ -93,6 +94,8 @@ export function AccountPanel() {
   const action = useAccountAction()
   async function logout() {
     if (!supabase) return
+    cancelPendingPush()
+    await settlePendingPush()
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       const subscription = await (
         await navigator.serviceWorker.getRegistration()
@@ -132,6 +135,9 @@ export function AccountPanel() {
         <p role="alert">
           Impossible de vérifier votre session. Vérifiez votre connexion puis réessayez.
         </p>
+      )}
+      {account.recovering && account.user && (
+        <p role="status">Connexion en cours de rétablissement. Votre compte est conservé.</p>
       )}
       {account.user && <p className="account-email">{account.user.email}</p>}
       {account.profile && (
