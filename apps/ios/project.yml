@@ -24,7 +24,6 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: fr.familycalendar.reveils
-        PRODUCT_NAME: CalendrierFamilial
         PRODUCT_MODULE_NAME: FamilyCalendar
         TARGETED_DEVICE_FAMILY: '1'
         GENERATE_INFOPLIST_FILE: YES
@@ -46,11 +45,22 @@ targets:
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
+  FamilyCalendarUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: FamilyCalendarUITests
+    dependencies:
+      - target: FamilyCalendar
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   FamilyCalendar:
     build:
       targets:
         FamilyCalendar: all
         FamilyCalendarTests: [test]
+        FamilyCalendarUITests: [test]
     test:
-      targets: [FamilyCalendarTests]
+      targets: [FamilyCalendarTests, FamilyCalendarUITests]

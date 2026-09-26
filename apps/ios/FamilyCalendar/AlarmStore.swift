@@ -118,8 +118,14 @@ final class AlarmStore {
             expectedEntries = plan.entries
             let desired = Dictionary(uniqueKeysWithValues: plan.entries.map { ($0.id, $0) })
             activeIDs = try driver.identifiers()
+            let alerting = try driver.alertingIdentifiers()
             // Cancel obsolete times before installing replacements. Never remove unknown system alarms.
             for (key, record) in archive.registrations where desired[key] == nil {
+                // Opening the app must not silence an alarm currently ringing.
+                if alerting.contains(record.systemID), archive.rules.contains(where: {
+                    $0.id == record.entry.ruleID && $0.enabled && $0.hour == record.entry.hour &&
+                    $0.minute == record.entry.minute && $0.title == record.entry.title
+                }) { continue }
                 if activeIDs.contains(record.systemID) { try driver.cancel(id: record.systemID) }
                 archive.registrations.removeValue(forKey: key)
                 try persist()

@@ -7,10 +7,12 @@ final class FakeAlarmDriver: AlarmDriver {
     var authorized = true
     var scheduled: [UUID: AlarmEntry] = [:]
     var schedulingCalls = 0
+    var alerting: Set<UUID> = []
     var failSchedule = false
     var failCancel = false
     func requestAuthorization() async throws -> Bool { authorized }
     func identifiers() throws -> Set<UUID> { Set(scheduled.keys) }
+    func alertingIdentifiers() throws -> Set<UUID> { alerting }
     func schedule(id: UUID, entry: AlarmEntry) async throws {
         schedulingCalls += 1
         if failSchedule { throw AlarmProblem.capacity }
@@ -82,6 +84,40 @@ final class AlarmStoreTests: XCTestCase {
         XCTAssertFalse(removed); XCTAssertEqual(store.rules.count, 1)
         XCTAssertEqual(driver.scheduled.count, 1)
         XCTAssertNotNil(store.errorMessage)
+    }
+
+    func testFailedDisableReportsRemainingAlarm() async throws {
+        let driver = FakeAlarmDriver(), location = file()
+        defer { try? FileManager.default.removeItem(at: location) }
+        let store = AlarmStore(driver: driver, file: location)
+        var rule = AlarmRule()
+        _ = await store.save(rule)
+        driver.failCancel = true
+        rule.enabled = false
+        let result = await store.save(rule)
+        XCTAssertFalse(result)
+        XCTAssertTrue(store.status(for: rule).contains("incomplète"))
+        XCTAssertEqual(driver.scheduled.count, 1)
+    }
+
+    func testForegroundRefreshDoesNotStopRingingAlarm() async throws {
+        let driver = FakeAlarmDriver(), location = file()
+        defer { try? FileManager.default.removeItem(at: location) }
+        var rule = AlarmRule()
+        rule.repeatMode = .once
+        rule.date = Date().addingTimeInterval(-86400)
+        let entry = try AlarmPlanner.plan([rule], now: Date().addingTimeInterval(-3 * 86400),
+                                          calendar: AlarmPlanner.calendar()).entries[0]
+        let systemID = UUID()
+        let registration = AlarmRegistration(systemID: systemID, entry: entry, appliedSignature: entry.signature)
+        let archive = AlarmArchive(rules: [rule], registrations: [entry.id: registration])
+        try JSONEncoder().encode(archive).write(to: location)
+        driver.scheduled[systemID] = entry
+        driver.alerting.insert(systemID)
+        let store = AlarmStore(driver: driver, file: location)
+        let refreshed = await store.synchronize()
+        XCTAssertTrue(refreshed)
+        XCTAssertEqual(driver.scheduled.count, 1)
     }
 
     func testCorruptStorageDoesNotEraseSystemAlarms() async throws {

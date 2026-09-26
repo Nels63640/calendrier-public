@@ -7,6 +7,7 @@ protocol AlarmDriver {
     var authorized: Bool { get }
     func requestAuthorization() async throws -> Bool
     func identifiers() throws -> Set<UUID>
+    func alertingIdentifiers() throws -> Set<UUID>
     func schedule(id: UUID, entry: AlarmEntry) async throws
     func cancel(id: UUID) throws
 }
@@ -25,6 +26,10 @@ final class SystemAlarmDriver: AlarmDriver {
     }
 
     func identifiers() throws -> Set<UUID> { Set(try manager.alarms.map(\.id)) }
+
+    func alertingIdentifiers() throws -> Set<UUID> {
+        Set(try manager.alarms.filter { $0.state == .alerting }.map(\.id))
+    }
 
     func cancel(id: UUID) throws { try manager.cancel(id: id) }
 
