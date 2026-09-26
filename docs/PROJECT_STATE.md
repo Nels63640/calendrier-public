@@ -4,7 +4,7 @@ Demande : permettre les modifications entre proprietaire et administrateur, et e
 
 Diagnostic production (sans contenu familial ni identifiants) : trois evenements admin partages, tous anterieurs a l abonnement proprietaire actuellement enregistre ; aucun job activite. Un appareil proprietaire actif, aucun appareil admin actif. Aucun renvoi retroactif ni notification de test envoyee. Les creations futures eligibles generent bien un job dans le test SQL.
 
-Test cible reussi : edition reciproque owner/admin, occurrence, refus des evenements prives et des modifications par membre ordinaire, statut push isole par compte, notification apres inscription. Validation complete reussie : npm run check, 42 tests unitaires et 85 tests navigateur ; format conforme. Publication en cours.
+Test cible reussi : edition reciproque owner/admin, occurrence, refus des evenements prives et des modifications par membre ordinaire, statut push isole par compte, notification apres inscription. Validation complete reussie : npm run check, 42 tests unitaires et 85 tests navigateur ; format conforme. Publication reussie : commit a561c19, workflow 36226796543 termine avec succes. Build public controle : droits partages et appel push_registered presents ; profil visible, ressources PWA HTTP 200, cle publique VAPID conforme, aucune erreur JavaScript. Reception sur telephone physique non verifiee.
 
 ## Historique
 
