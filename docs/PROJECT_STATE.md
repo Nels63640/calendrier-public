@@ -1,3 +1,13 @@
+# Appui long et notifications d’activité : 26 septembre 2026
+
+Un appui de 500 ms sur la grille horaire ouvre un événement à cet emplacement, arrondi au quart d’heure, pour une durée initiale d’une heure. Un mouvement de plus de 10 px ou un défilement annule le geste. L’encadré enregistré se rouvre au toucher ; sa hauteur suit la durée modifiée. Aucun redimensionnement par glisser n’est implémenté.
+
+Les notifications d’activité sont préparées dans la migration 007 et la fonction reminders : autres membres inscrits aux push, tous rôles, exclusion de l’auteur, confidentialité et file transactionnelle avec reprise. Le déclencheur HTTP après validation et le cron doivent être installés avec les secrets serveur. La connexion Supabase est proposée mais le plugin est toujours non installé au dernier contrôle. Aucun envoi réel activé ni prétendu : voir [activation](PUSH_ACTIVATION.md).
+
+Validation locale : npm run check réussi, 34 tests unitaires et 78 tests navigateur, dont création par appui long, geste annulé, édition et hauteur 1 h/2 h sur Chromium et WebKit. Un test supplémentaire réussi couvre les profils, invitations et modifications de rôle regroupées. Publication de cette évolution à consigner.
+
+## Historique
+
 # Entrée unique par le calendrier : 26 septembre 2026
 
 La route / affiche le calendrier pour tous, y compris hors connexion au compte. L’ancienne page HomePage est supprimée, l’onglet Accueil retiré, et les liens de retour/erreur renommés vers le calendrier. /calendrier reste compatible avec les anciens liens. Les fonctions familiales gardent leur demande de connexion ; aucune donnée privée n’est rendue publique.
@@ -6,7 +16,7 @@ Le retour mois → année anime désormais la grille et le titre vers la miniatu
 
 Nouvelle icône statique représentant un calendrier noir et rouge, déclinée en SVG, PNG 192/512, Apple 180 et maskable. Elle ne prétend pas afficher la date du jour ; les installations iPhone existantes peuvent conserver leur ancienne icône. Rendu PNG contrôlé visuellement.
 
-Validation et publication à consigner.
+Publication a25166d réussie, workflow GitHub 36219752816. Contrôle public : calendrier à la racine, aucun onglet Accueil, dézoom et icône calendrier vérifiés.
 
 ## Historique
 

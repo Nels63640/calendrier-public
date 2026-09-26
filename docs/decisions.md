@@ -65,3 +65,7 @@ La demande utilisateur supprime complètement l’ancienne entrée tableau de bo
 ## 26 septembre 2026 — Dézoom et icône calendrier
 
 Le retour vers l’année utilise la position réelle de la miniature du mois courant et une animation inverse, désactivée en réduction des animations. L’icône maison est remplacée par un calendrier noir et rouge, sans date fixe trompeuse. Le système iOS conserve la maîtrise du rafraîchissement des icônes déjà installées.
+
+## 26 septembre 2026 — Appui long et alertes partagées
+
+L’appui long reste compatible avec le défilement natif : aucune capture empêchant le déplacement, annulation au mouvement, préremplissage au quart d’heure. Les alertes sont déclenchées côté base, jamais depuis le téléphone de l’auteur. Une file transactionnelle privée exclut l’auteur et respecte la visibilité, quel que soit le rôle du destinataire. Le réveil HTTP et le cron partagent un secret conservé dans Vault et la fonction. Activation réelle séparée des tests locaux, sans exposer de secret administrateur au frontend.

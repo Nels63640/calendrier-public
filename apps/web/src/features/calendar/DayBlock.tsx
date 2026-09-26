@@ -1,3 +1,4 @@
+import { useTimelineHold } from './useTimelineHold'
 import { useMemo, type ReactNode, type CSSProperties } from 'react'
 import { Temporal } from '@js-temporal/polyfill'
 import { calendarWindow, expandEvent } from '../../../../../packages/domain/src/recurrence'
@@ -14,6 +15,7 @@ export function DayBlock({
   records,
   exceptions,
   renderEvent,
+  onCreate,
 }: {
   date: Temporal.PlainDate
   today: Temporal.PlainDate
@@ -22,7 +24,9 @@ export function DayBlock({
   records: FamilyRecord<'event'>[]
   exceptions: EventException[]
   renderEvent: (o: Occurrence, style?: CSSProperties) => ReactNode
+  onCreate: (date: Temporal.PlainDate, minute: number) => void
 }) {
+  const hold = useTimelineHold((minute) => onCreate(date, minute))
   const range = calendarWindow(date.toString(), 'day', zone)
   const dayEvents = useMemo(
     () => records.flatMap((r) => expandEvent(r, exceptions, range.from, range.to)),
@@ -73,7 +77,7 @@ export function DayBlock({
           <div>{dayEvents.filter((o) => o.event.allDay).map((o) => renderEvent(o))}</div>
         </div>
       )}
-      <div className="native-timeline">
+      <div className="native-timeline" {...hold}>
         {Array.from({ length: 25 }, (_, hour) => (
           <div className="hour-line" key={hour} style={{ top: hour * 50 }}>
             <span>{String(hour % 24).padStart(2, '0')}:00</span>

@@ -20,7 +20,8 @@ export function NotificationSettings() {
         .catch(() => {})
   }, [supported])
   async function enable() {
-    if (!key) throw new AccountError('Les rappels ne sont pas encore raccordés à cet espace.')
+    if (!key)
+      throw new AccountError('Les notifications ne sont pas encore raccordées à cet espace.')
     const registration = await navigator.serviceWorker.getRegistration()
     if (!registration?.active)
       throw new AccountError('Préparez l’installation de l’application, puis réessayez.')
@@ -46,7 +47,7 @@ export function NotificationSettings() {
         p_auth: json.keys?.auth,
       })
       setEnabled(true)
-      return 'Les rappels sont activés sur cet appareil.'
+      return 'Les notifications sont activées sur cet appareil.'
     } catch (error) {
       await subscription.unsubscribe()
       throw error
@@ -66,11 +67,12 @@ export function NotificationSettings() {
   if (!account.user) return null
   return (
     <section className="settings-card">
-      <h2>Vos rappels</h2>
+      <h2>Vos notifications</h2>
       <p>
         Sur iPhone, ajoutez l’application à l’écran d’accueil, puis ouvrez-la depuis son icône pour
         autoriser les notifications.
       </p>
+      <p>Recevez les ajouts et modifications des autres membres du foyer, ainsi que vos rappels.</p>
       <p className="muted">
         Les alertes restent discrètes sur l’écran verrouillé. La réception dépend de l’appareil et
         du réseau ; elle n’est pas garantie à la seconde.
@@ -78,7 +80,7 @@ export function NotificationSettings() {
       {!supported ? (
         <p>Les notifications ne sont pas disponibles dans ce navigateur.</p>
       ) : !key ? (
-        <p>Les rappels attendent encore leur raccordement serveur.</p>
+        <p>Les notifications attendent encore leur raccordement serveur.</p>
       ) : (
         <div className="row-actions">
           <button

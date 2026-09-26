@@ -21,6 +21,7 @@ export function EventEditor({
   onClose,
   compact = false,
   periodEnd,
+  initialStart,
   onSaved,
 }: {
   record?: FamilyRecord<'event'>
@@ -30,6 +31,7 @@ export function EventEditor({
   onClose: () => void
   compact?: boolean
   periodEnd?: string
+  initialStart?: string
   onSaved?: () => void
 }) {
   const family = useFamily(),
@@ -45,6 +47,14 @@ export function EventEditor({
     : {
         ...blankEvent(date, account.profile?.time_zone ?? 'Europe/Paris'),
         custody,
+        ...(initialStart
+          ? {
+              start: initialStart,
+              end: Temporal.PlainDateTime.from(initialStart)
+                .add({ hours: 1 })
+                .toString({ smallestUnit: 'minute' }),
+            }
+          : {}),
         ...(periodEnd
           ? {
               allDay: true,

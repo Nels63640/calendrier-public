@@ -90,6 +90,7 @@ function NativeCalendar() {
     occurrence?: Occurrence
     date: string
     periodEnd?: string
+    initialStart?: string
   } | null>(null)
   const scroll = useRef<HTMLDivElement>(null)
   const { prepareMonthZoom, prepareYearZoom } = useMonthZoom(view, date.toString(), scroll)
@@ -402,6 +403,14 @@ function NativeCalendar() {
                 records={records}
                 exceptions={family.snapshot.exceptions}
                 renderEvent={eventButton}
+                onCreate={(day, minute) =>
+                  setEditor({
+                    date: day.toString(),
+                    initialStart: day
+                      .toPlainDateTime({ hour: Math.floor(minute / 60), minute: minute % 60 })
+                      .toString({ smallestUnit: 'minute' }),
+                  })
+                }
               />
             )}
           </CalendarStream>

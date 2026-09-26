@@ -531,3 +531,9 @@ textarea {
 .native-calendar[data-zooming='out'] .mini-month[data-zoom-target] h2 {
   will-change: transform, opacity;
 }
+.native-timeline {
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}

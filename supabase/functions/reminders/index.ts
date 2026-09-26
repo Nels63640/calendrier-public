@@ -1,3 +1,4 @@
+import { deliverPushJobs, type PushJob } from '../../../packages/domain/src/push-delivery.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.116.0'
 import webpush from 'npm:web-push@3.6.7'
 import { planReminders, type ReminderSource } from '../../../packages/domain/src/reminders.ts'
@@ -24,6 +25,16 @@ Deno.serve(async (request) => {
   )
     return new Response('Accès refusé', { status: 401 })
   try {
+    const send = (
+      subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
+      payload: string,
+    ) => webpush.sendNotification(subscription, payload, { TTL: 3600, timeout: 5000 })
+    const activityJobs = await rpc<PushJob[]>('claim_activity')
+    await deliverPushJobs(activityJobs, 'activity', {
+      send,
+      finish: (id, lease, status) =>
+        rpc('finish_activity', { p_id: id, p_lease: lease, p_status: status }),
+    })
     await rpc('prune_family_data')
     let after = await rpc<string>('reminder_cursor')
     const started = Date.now()
@@ -57,47 +68,12 @@ Deno.serve(async (request) => {
         keys: { p256dh: string; auth: string }
       }[]
     >('claim_reminders')
-    for (let offset = 0; offset < jobs.length; offset += 5) {
-      await Promise.all(
-        jobs.slice(offset, offset + 5).map(async (job) => {
-          let status = 'sent'
-          try {
-            const endpoint = new URL(job.endpoint)
-            if (
-              endpoint.protocol !== 'https:' ||
-              endpoint.port ||
-              endpoint.username ||
-              endpoint.password ||
-              !(
-                /^(?:[a-z0-9-]+\.)?push\.apple\.com$/.test(endpoint.hostname) ||
-                ['fcm.googleapis.com', 'updates.push.services.mozilla.com'].includes(
-                  endpoint.hostname,
-                )
-              )
-            )
-              throw new Error('Destination refusée')
-            await webpush.sendNotification(
-              { endpoint: job.endpoint, keys: job.keys },
-              JSON.stringify({
-                kind: 'reminder',
-                id: job.id,
-                title: 'Calendrier familial',
-                body: 'Un rappel vous attend dans votre espace.',
-                tag: job.id,
-                url: '/calendrier',
-              }),
-              { TTL: 300, timeout: 5000 },
-            )
-          } catch (error) {
-            const code =
-              error && typeof error === 'object' && 'statusCode' in error ? error.statusCode : 0
-            status = code === 404 || code === 410 ? 'expired' : 'retry'
-          }
-          await rpc('finish_reminder', { p_id: job.id, p_lease: job.lease, p_status: status })
-        }),
-      )
-    }
-    return Response.json({ processed: jobs.length })
+    await deliverPushJobs(jobs, 'reminder', {
+      send,
+      finish: (id, lease, status) =>
+        rpc('finish_reminder', { p_id: id, p_lease: lease, p_status: status }),
+    })
+    return Response.json({ processed: jobs.length, activities: activityJobs.length })
   } catch {
     return Response.json(
       { error: 'Traitement incomplet, reprise au prochain passage.' },
