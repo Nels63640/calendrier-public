@@ -4,7 +4,7 @@
 
 Connexion MCP `supabase-calendar` opérationnelle, limitée au projet `xyfjpeojctmncpfymiyr`. Migrations 007 (activité) et 008 (configuration Vault) appliquées ; fonction `reminders` version 1 déployée et ACTIVE. Les appels sans secret ou avec un secret incorrect répondent HTTP 401. La lecture de configuration est interdite à `anon` et `authenticated`, réservée à `service_role` et conditionnée au secret de déclenchement.
 
-**Serveur activé :** secrets transférés dans Vault après le « oui » explicite de l’utilisateur. Cron chaque minute et déclencheur HTTP installés. Appel authentifié réel HTTP 200 (aucun travail en attente), clé publique VAPID configurée et vérifiée sur GitHub. L’utilisateur a explicitement autorisé le push vers main et le déploiement GitHub Pages associé. Publication autorisée, vérification du déploiement en cours. Aucun appareil abonné lors du contrôle ; aucune réception réelle vérifiée.
+**Serveur activé :** secrets transférés dans Vault après le « oui » explicite de l’utilisateur. Cron chaque minute et déclencheur HTTP installés. Appel authentifié réel HTTP 200 (aucun travail en attente), clé publique VAPID configurée et vérifiée sur GitHub. L’utilisateur a explicitement autorisé le push vers main et le déploiement GitHub Pages associé. Publication Pages réussie : commit 5beb948, workflow 36222436380 terminé avec succès (tests, format et déploiement). Contrôle public Chromium : clé VAPID identique à la variable GitHub, page/manifest/Service Worker HTTP 200, profil visible et aucune erreur JavaScript. Aucun appareil abonné lors du contrôle ; aucune réception réelle vérifiée.
 
 Le refus automatique initial est levé par l’autorisation explicite portant sur le fichier et le projet. Aucune clé régénérée ; aucune valeur privée affichée ou versionnée.
 
@@ -19,10 +19,14 @@ Les secrets ne sont pas intégrés au code de la fonction, aux migrations ou au 
 1. Quatre valeurs transférées depuis .local/production-push.json vers Vault sous leurs noms existants : REMINDER_CRON_SECRET, VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY.
 2. Moteur reminders appelé avec le secret : HTTP 200, processed=0 et activities=0.
 3. Scripts setup-reminder-cron.sql et setup-activity-push.sql appliqués via MCP ; cron actif et déclencheur installé.
-4. Variable GitHub VITE_VAPID_PUBLIC_KEY configurée et relue ; publication Pages explicitement autorisée par l’utilisateur, vérification du déploiement en cours.
+4. Variable GitHub VITE_VAPID_PUBLIC_KEY configurée et relue ; publication Pages réussie, commit 5beb948 et workflow 36222436380. Clé VAPID et chargement PWA vérifiés sur le site public.
 5. Réception sur appareils à vérifier après activation volontaire dans Profil > Notifications > Activer sur cet appareil.
 
 Les migrations 001 à 006 existaient déjà. Ne pas rejouer `INSTALL.sql` ni les migrations 007/008 sur cette base. La migration 008 nécessite Vault, fourni sur le projet Supabase ; le test local en simule uniquement la vue pour vérifier les permissions.
+
+## Utiliser les rappels avant événement
+
+Dans le formulaire de création ou de modification, ouvrir « Répétition, partage et autres options », puis « Rappels, en minutes avant le début ». Exemple : 15, 60 pour être averti 15 minutes et une heure avant. Jusqu’à cinq délais, de 0 à 43 200 minutes (30 jours) ; aucun rappel par défaut. Les délais sont partagés avec l’événement : les membres autorisés à le voir et inscrits aux notifications peuvent recevoir les rappels, auteur compris. Le cron serveur fonctionne aussi application fermée ; la réception exacte dépend du réseau et du système.
 
 ## Recette réelle à effectuer
 

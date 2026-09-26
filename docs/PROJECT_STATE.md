@@ -1,8 +1,8 @@
-# Notifications activées côté serveur : 26 septembre 2026
+# Notifications et rappels publiés : 26 septembre 2026
 
 L’utilisateur a explicitement autorisé le transfert de .local/production-push.json vers Vault du projet xyfjpeojctmncpfymiyr. Les quatre valeurs ont été transférées sans affichage et sans régénération des clés. Migrations 007 et 008 appliquées, fonction reminders version 1 ACTIVE, cron family-reminders chaque minute et déclencheur wake_activity_worker installés. Appel authentifié réel : HTTP 200, processed=0 et activities=0 ; appels non autorisés : HTTP 401. Permissions SQL vérifiées : configuration refusée à anon/authenticated, réservée à service_role.
 
-Cron réel vérifié : réponses HTTP 200 sans délai dépassé. Clé publique VAPID configurée et relue sur GitHub. L’utilisateur a explicitement autorisé le push vers main et le déploiement GitHub Pages associé. Publication autorisée, vérification du déploiement en cours. Aucun appareil abonné lors de l’activation ; aucune réception réelle sur téléphone prétendue. Parcours utilisateur : Profil > Notifications > Activer sur cet appareil. Sur iPhone, ouvrir d’abord l’application installée depuis l’écran d’accueil.
+Cron réel vérifié : réponses HTTP 200 sans délai dépassé. Clé publique VAPID configurée et relue sur GitHub. L’utilisateur a explicitement autorisé le push vers main et le déploiement GitHub Pages associé. Publication Pages réussie : commit 5beb948, workflow 36222436380 terminé avec succès (tests, format et déploiement). Contrôle public Chromium : clé VAPID identique à la variable GitHub, page/manifest/Service Worker HTTP 200, profil visible et aucune erreur JavaScript. Aucun appareil abonné lors de l’activation ; aucune réception réelle sur téléphone prétendue. Parcours utilisateur : Profil > Notifications > Activer sur cet appareil. Sur iPhone, ouvrir d’abord l’application installée depuis l’écran d’accueil.
 
 Validation du code : npm run check réussi, 36 tests unitaires et 78 tests navigateur Chromium/WebKit ; format:check réussi. Voir [PUSH_ACTIVATION.md](PUSH_ACTIVATION.md). Aucun changement du serveur RedM voisin.
 

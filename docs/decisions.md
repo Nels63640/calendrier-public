@@ -85,3 +85,5 @@ L’activation serveur et le transfert explicitement autorisé sont terminés. L
 ## 26 septembre 2026 : publication explicitement autorisée
 
 L’utilisateur répond « oui » à la demande explicite de push vers main de Nels63640/calendrier-public et de déploiement GitHub Pages associé. Cette autorisation lève le blocage de publication précédent. Publier les changements préparés et vérifier le résultat du workflow ainsi que le raccordement public.
+
+Publication et contrôle public réussis : commit 5beb948, workflow 36222436380. Aucun appareil abonné lors de la mise en service ; la livraison push sur téléphone reste à confirmer après consentement dans le profil. Les rappels sont configurés par événement, sans délai par défaut, et concernent les membres autorisés à voir l’événement.
