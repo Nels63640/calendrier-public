@@ -60,6 +60,8 @@ test('jours fériés, zones scolaires persistantes et anniversaire annuel', asyn
   page,
   context,
 }) => {
+  // Ce parcours complet dépasse 30 s sur WebKit dans le runner CI.
+  test.setTimeout(60_000)
   const db = await familyDatabase()
   try {
     await asUser(db, alice)
