@@ -1,3 +1,13 @@
+# Edition partagee et diagnostic notifications : 26 septembre 2026
+
+Demande : permettre les modifications entre proprietaire et administrateur, et expliquer les notifications absentes. Migrations 012 et 013 appliquees : save_record et change_occurrence autorisent owner/admin sur les evenements lisibles uniquement ; confidentialite, version et auteur original conserves. Interface EventEditor alignee. Nouveau RPC push_registered limite au compte courant ; le statut du navigateur seul ne suffit plus. Reactivation reutilise un abonnement existant au lieu de le remplacer.
+
+Diagnostic production (sans contenu familial ni identifiants) : trois evenements admin partages, tous anterieurs a l abonnement proprietaire actuellement enregistre ; aucun job activite. Un appareil proprietaire actif, aucun appareil admin actif. Aucun renvoi retroactif ni notification de test envoyee. Les creations futures eligibles generent bien un job dans le test SQL.
+
+Test cible reussi : edition reciproque owner/admin, occurrence, refus des evenements prives et des modifications par membre ordinaire, statut push isole par compte, notification apres inscription. Validation complete reussie : npm run check, 42 tests unitaires et 85 tests navigateur ; format conforme. Publication en cours.
+
+## Historique
+
 # Calendriers officiels, anniversaires et rappels enrichis : 26 septembre 2026
 
 Demandes intégrées : notifications avec date, heure et titre ; rappels en minutes/heures/jours/semaines/mois ; jours fériés de France métropolitaine et vacances des zones A/B/C sélectionnables ; anniversaires annuels. Sources officielles embarquées, préférences de zones propres à cet appareil. Détails et limites : [CALENDAR_EXTRAS.md](CALENDAR_EXTRAS.md).

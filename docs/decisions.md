@@ -91,3 +91,7 @@ Publication et contrôle public réussis : commit 5beb948, workflow 36222436380.
 ## 26 septembre 2026 : notifications détaillées et calendriers complémentaires
 
 L’utilisateur remplace explicitement les messages génériques par la date, l’heure et le titre pour rappels, ajouts et modifications. Il demande ensuite un choix de délais en minutes/heures/jours/semaines/mois, puis jours fériés, anniversaires et vacances par zone. Territoire confirmé : France métropolitaine, zones A/B/C. Conserver les contrôles de visibilité. Les mois sont civils, les anniversaires annuels, et les données publiques proviennent d’un instantané officiel embarqué. Les choix de couches sont des préférences d’affichage locales à l’appareil ; les anniversaires restent des événements privés au foyer en base. Voir CALENDAR_EXTRAS.md.
+
+## 26 septembre 2026 : edition partagee
+
+Les proprietaires et administrateurs peuvent modifier les evenements auxquels ils ont acces, y compris les occurrences. Les evenements prives restent invisibles et non modifiables aux autres. Le statut des notifications est verifie sur le serveur pour le compte courant ; les creations precedant l inscription ne sont pas rejouees.

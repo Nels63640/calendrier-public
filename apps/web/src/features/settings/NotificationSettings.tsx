@@ -16,9 +16,13 @@ export function NotificationSettings() {
       void navigator.serviceWorker
         .getRegistration()
         .then((r) => r?.pushManager.getSubscription())
-        .then((s) => setEnabled(Boolean(s)))
+        .then(async (s) =>
+          setEnabled(
+            Boolean(s) && (await rpc<boolean>('push_registered', { p_endpoint: s!.endpoint })),
+          ),
+        )
         .catch(() => {})
-  }, [supported])
+  }, [supported, account.user?.id])
   async function enable() {
     if (!key)
       throw new AccountError('Les notifications ne sont pas encore raccordées à cet espace.')
@@ -34,11 +38,12 @@ export function NotificationSettings() {
       c.charCodeAt(0),
     )
     const old = await registration.pushManager.getSubscription()
-    if (old) await old.unsubscribe()
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: bytes,
-    })
+    const subscription =
+      old ??
+      (await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: bytes,
+      }))
     try {
       const json = subscription.toJSON()
       await rpc('register_push', {
@@ -49,7 +54,7 @@ export function NotificationSettings() {
       setEnabled(true)
       return 'Les notifications sont activées sur cet appareil.'
     } catch (error) {
-      await subscription.unsubscribe()
+      if (!old) await subscription.unsubscribe()
       throw error
     }
   }
@@ -73,6 +78,10 @@ export function NotificationSettings() {
         autoriser les notifications.
       </p>
       <p>Recevez les ajouts et modifications des autres membres du foyer, ainsi que vos rappels.</p>
+      <p>
+        Les alertes commencent après l’activation sur cet appareil. Les événements créés auparavant
+        ne sont pas renvoyés.
+      </p>
       <p className="muted">
         Les alertes affichent le titre, la date et l’heure de l’événement, y compris sur l’écran
         verrouillé. La réception dépend de l’appareil et du réseau ; elle n’est pas garantie à la

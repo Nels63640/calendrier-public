@@ -83,7 +83,9 @@ export function EventEditor({
   const categories = family.snapshot.records.filter(
     (r) => r.kind === 'category',
   ) as FamilyRecord<'category'>[]
-  const canEdit = !record || record.created_by === account.user?.id
+  const role = family.snapshot.members.find((member) => member.user_id === account.user?.id)?.role
+  const canEdit =
+    !record || record.created_by === account.user?.id || role === 'owner' || role === 'admin'
   function patch<K extends keyof FamilyEvent>(key: K, value: FamilyEvent[K]) {
     setDraft({ ...draft, [key]: value })
   }
@@ -135,7 +137,12 @@ export function EventEditor({
           Fermer
         </button>
       </div>
-      {!canEdit && <p>Seule la personne qui a créé cet événement peut le modifier.</p>}
+      {!canEdit && (
+        <p>
+          La personne qui a créé cet événement, le propriétaire et les administrateurs peuvent le
+          modifier.
+        </p>
+      )}
       <form className="account-form" onSubmit={submit}>
         <fieldset disabled={action.busy || !canEdit}>
           {record?.payload.recurrence && occurrence && (
